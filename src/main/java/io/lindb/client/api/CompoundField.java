@@ -31,13 +31,14 @@ public class CompoundField implements Field {
 
 	/**
 	 * Create a compound field instance.
+	 * Notice: bounds length must be equals values length
 	 * 
-	 * @param count  {@link double}
-	 * @param sum    {@link double}
-	 * @param min    {@link double}
-	 * @param max    {@link double}
-	 * @param bounds
-	 * @param values
+	 * @param count  count value
+	 * @param sum    sum value
+	 * @param min    min value
+	 * @param max    max value
+	 * @param bounds bound array
+	 * @param values value array
 	 */
 	protected CompoundField(double count, double sum, double min, double max, double[] bounds, double[] values) {
 		this.count = count;

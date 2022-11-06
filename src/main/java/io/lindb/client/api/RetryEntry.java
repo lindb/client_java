@@ -31,7 +31,7 @@ public class RetryEntry {
 	/**
 	 * Create retryn entry instance with data.
 	 * 
-	 * @param data
+	 * @param data data of point
 	 */
 	protected RetryEntry(byte[] data) {
 		this.data = data;
@@ -47,7 +47,7 @@ public class RetryEntry {
 	/**
 	 * Return the retry data.
 	 * 
-	 * @return data
+	 * @return data of point
 	 */
 	public byte[] getData() {
 		return data;

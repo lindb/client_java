@@ -31,7 +31,7 @@ public interface Client {
 	 * 
 	 * @param database database name {@link String}
 	 * @return write client {@link Write}
-	 * @throws {{@link IOException}}
+	 * @throws IOException if send data error
 	 */
 	Write write(String database) throws IOException;
 }

@@ -31,6 +31,9 @@ import io.lindb.client.util.StringUtils;
  * Write api configuration options.
  */
 public final class WriteOptions {
+	/**
+	 * Write api options builder.
+	 */
 	@NotThreadSafe
 	public static class Builder {
 		private int batchSize = DEFAULT_BATCH_SIZE;
@@ -164,12 +167,33 @@ public final class WriteOptions {
 		}
 	}
 
+	/**
+	 * Default batch size.
+	 */
 	public static final int DEFAULT_BATCH_SIZE = 1_000;
+	/**
+	 * Default batch queue size.
+	 */
 	public static final int DEFAULT_BATCH_QUEUE = 1024;
+	/**
+	 * Default send queue size.
+	 */
 	public static final int DEFAULT_SEND_QUEUE = 1024;
+	/**
+	 * Default flush interval(ms).
+	 */
 	public static final long DEFAULT_FLUSH_INTERVAL = 1_000;
+	/**
+	 * Default gzip compress.
+	 */
 	public static final boolean DEFAULT_USE_GZIP = true;
+	/**
+	 * Default max retry count.
+	 */
 	public static final int DEFAULT_MAX_RETRIES = 3;
+	/**
+	 * Default retry queue size.
+	 */
 	public static final int DEFAULT_RETRY_QUEUE = 1_00;
 
 	/**

@@ -29,10 +29,10 @@ public class WriteFactory {
 	/**
 	 * Retrun write api based on given write options and http client.
 	 * 
-	 * @param options
-	 * @param client
+	 * @param options write options
+	 * @param client  http client
 	 * @return write api {@link Write}
-	 * @throws {@lind IOException}
+	 * @throws IOException create error
 	 */
 	public static Write createWrite(WriteOptions options, HttpClient client) throws IOException {
 		return new WriteImpl(options, client);

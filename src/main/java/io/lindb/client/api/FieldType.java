@@ -22,10 +22,25 @@ package io.lindb.client.api;
  * Simple field type.
  */
 public enum FieldType {
+	/**
+	 * Last field type.
+	 */
 	Last(1),
+	/**
+	 * Sum field type.
+	 */
 	Sum(2),
+	/**
+	 * Min field type.
+	 */
 	Min(3),
+	/**
+	 * Max field type.
+	 */
 	Max(4),
+	/**
+	 * First field type.
+	 */
 	First(5);
 
 	private byte val;

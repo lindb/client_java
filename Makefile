@@ -16,6 +16,9 @@ generate: ## generate proto code
 	mvn generate-sources
 
 deploy: ## deploy to mvn repo
+	# install gpg https://docs.releng.linuxfoundation.org/en/latest/gpg.html
+	# https://central.sonatype.org/publish/requirements/gpg/#listing-keys
+	# export GPG_TTY=$(tty)
 	mvn clean deploy
 
 update: ## update project/classpath 
