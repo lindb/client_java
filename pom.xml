@@ -30,11 +30,32 @@
 	<packaging>jar</packaging>
 
 	<name>LinDB Java Client SDK</name>
+	<description>
+		The reference JVM client for the LinDB.
+    </description>
+
+    <url>https://github.com/lindb/client_java</url>
 
 	<organization>
         <name>LinDB</name>
         <url>https://lindb.io</url>
     </organization>
+
+	<developers>
+        <developer>
+            <name>stone1100</name>
+            <email>stonejh1100@gmail.com</email>
+            <organization>LinDB</organization>
+            <organizationUrl>https://www.lindb.io</organizationUrl>
+        </developer>
+        <developer>
+            <name>CodingCrush</name>
+            <email>codingcrush@163.com</email>
+            <organization>LinDB</organization>
+            <organizationUrl>https://www.lindb.io</organizationUrl>
+        </developer>
+    </developers>
+
 
 	<licenses>
         <license>
@@ -109,6 +130,37 @@
 
 	<build>
 		<plugins>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+			<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+				<configuration>
+					<excludePackageNames>
+						io.lindb.client.flat.metrics.*
+					</excludePackageNames>
+				</configuration>
+            </plugin>
 			<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -209,8 +261,53 @@
     				</licenseSets>
   				</configuration>
 			</plugin>
+            <plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                	<execution>
+                		<id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                        	<goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+        <!-- GPG Signature on release -->
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 	<distributionManagement>
   		<snapshotRepository>

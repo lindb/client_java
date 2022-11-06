@@ -23,9 +23,13 @@ import javax.annotation.concurrent.NotThreadSafe;
 import com.google.common.base.Preconditions;
 
 /**
- * Http client configuration options
+ * Http client configuration options.
  */
 public final class HttpOptions {
+
+	/**
+	 * Http client options builder.
+	 */
 	@NotThreadSafe
 	public static class Builder {
 		private HttpOptions options;
@@ -76,6 +80,11 @@ public final class HttpOptions {
 			return this;
 		}
 
+		/**
+		 * Rreturn http options based on settings.
+		 * 
+		 * @return http options
+		 */
 		public HttpOptions build() {
 			return this.options;
 		}
@@ -105,7 +114,7 @@ public final class HttpOptions {
 	/**
 	 * Return connect timeout
 	 * 
-	 * @return
+	 * @return connect timeout
 	 */
 	public long getConnectTimeout() {
 		return connectTimeout;
@@ -114,7 +123,7 @@ public final class HttpOptions {
 	/**
 	 * Return read timeout
 	 * 
-	 * @return
+	 * @return read timeout
 	 */
 	public long getReadTimeout() {
 		return readTimeout;
@@ -123,7 +132,7 @@ public final class HttpOptions {
 	/**
 	 * Return write timeout
 	 * 
-	 * @return
+	 * @return write time
 	 */
 	public long getWriteTimeout() {
 		return writeTimeout;

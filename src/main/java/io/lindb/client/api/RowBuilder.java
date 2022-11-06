@@ -47,7 +47,8 @@ public class RowBuilder {
 	/**
 	 * Write point into flat buffer then returns binary value of point.
 	 * 
-	 * @param point
+	 * @param point       metric data point
+	 * @param defaultTags default tags for metric
 	 * @return the data of point
 	 */
 	public byte[] build(final Point point, Map<String, String> defaultTags) {
@@ -139,9 +140,9 @@ public class RowBuilder {
 	/**
 	 * Write simple field into flat buffer.
 	 * 
-	 * @param name
-	 * @param type
-	 * @param value
+	 * @param name  field name
+	 * @param type  field type
+	 * @param value field value
 	 * @return field offset
 	 */
 	public int addSimpleField(String name, FieldType type, double value) {
@@ -157,12 +158,12 @@ public class RowBuilder {
 	/**
 	 * Write compound field into flat buffer.
 	 * 
-	 * @param count
-	 * @param sum
-	 * @param min
-	 * @param max
-	 * @param bounds
-	 * @param values
+	 * @param count  count value
+	 * @param sum    sum value
+	 * @param min    min value
+	 * @param max    max value
+	 * @param bounds bound array
+	 * @param values value array
 	 * @return field offset
 	 */
 	public int addCompoundField(double count, double sum, double min, double max, double[] bounds, double[] values) {

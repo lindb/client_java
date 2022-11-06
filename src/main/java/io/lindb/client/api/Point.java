@@ -47,7 +47,7 @@ public class Point {
 		/**
 		 * Set the namespace of point.
 		 * 
-		 * @param namespace
+		 * @param namespace namespace of metric point
 		 * @return builder
 		 */
 		public Builder namespace(String namespace) {
@@ -58,8 +58,8 @@ public class Point {
 		/**
 		 * Add tag key/value into the tags of point.
 		 * 
-		 * @param key
-		 * @param value
+		 * @param key   tag key
+		 * @param value tag value
 		 * @return builder
 		 */
 		public Builder addTag(String key, String value) {
@@ -78,7 +78,7 @@ public class Point {
 		/**
 		 * Add tags into the tags of point.
 		 * 
-		 * @param tags
+		 * @param tags tags of metric point
 		 * @return builder
 		 */
 		public Builder addTags(Map<String, String> tags) {
@@ -95,8 +95,8 @@ public class Point {
 		/**
 		 * Add sum simple field with name and value.
 		 * 
-		 * @param name
-		 * @param value
+		 * @param name  field name
+		 * @param value field value
 		 * @return builder
 		 */
 		public Builder addSum(String name, double value) {
@@ -106,8 +106,8 @@ public class Point {
 		/**
 		 * Add min simple field with name and value.
 		 * 
-		 * @param name
-		 * @param value
+		 * @param name  field name
+		 * @param value field value
 		 * @return builder
 		 */
 		public Builder addMin(String name, double value) {
@@ -117,8 +117,8 @@ public class Point {
 		/**
 		 * Add max simple field with name and value.
 		 * 
-		 * @param name
-		 * @param value
+		 * @param name  field name
+		 * @param value field value
 		 * @return builder
 		 */
 		public Builder addMax(String name, double value) {
@@ -128,8 +128,8 @@ public class Point {
 		/**
 		 * Add last simple field with name and value.
 		 * 
-		 * @param name
-		 * @param value
+		 * @param name  field name
+		 * @param value field value
 		 * @return builder
 		 */
 		public Builder addLast(String name, double value) {
@@ -139,8 +139,8 @@ public class Point {
 		/**
 		 * Add first simple field with name and value.
 		 * 
-		 * @param name
-		 * @param value
+		 * @param name  field name
+		 * @param value field value
 		 * @return builder
 		 */
 		public Builder addFirst(String name, double value) {
@@ -149,13 +149,15 @@ public class Point {
 
 		/**
 		 * Add histogram field with values.
+		 * Notice: bounds length must be equals values length
 		 * 
-		 * @param count
-		 * @param sum
-		 * @param min
-		 * @param max
-		 * @param bounds
-		 * @param values
+		 * @param count  count value
+		 * @param sum    sum value
+		 * @param min    min value
+		 * @param max    max value
+		 * @param bounds bound array
+		 * @param values value array
+		 *
 		 * @return builder
 		 */
 		public Builder addHistogram(double count, double sum, double min, double max, double[] bounds,
@@ -209,7 +211,7 @@ public class Point {
 		/**
 		 * Add field just for testing.
 		 * 
-		 * @param field {@link Field}
+		 * @param field field
 		 * @return builder
 		 */
 		protected Builder addField(Field field) {
@@ -224,7 +226,7 @@ public class Point {
 	/**
 	 * Create a builder instance with metric name.
 	 * 
-	 * @param name
+	 * @param name name of metric
 	 * @return builder
 	 */
 	public static Builder builder(String name) {
@@ -234,8 +236,8 @@ public class Point {
 	/**
 	 * Create a builder instance with metric name and timestamp.
 	 * 
-	 * @param name
-	 * @param timestamp
+	 * @param name      name of metric
+	 * @param timestamp timestamp of point
 	 * @return builder
 	 */
 	public static Builder builder(String name, long timestamp) {

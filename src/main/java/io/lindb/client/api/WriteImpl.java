@@ -60,14 +60,22 @@ public class WriteImpl implements Write {
 	/**
 	 * Create a write api instance with options and http client.
 	 * 
-	 * @param options
-	 * @param client
-	 * @throws IOException
+	 * @param options write options
+	 * @param client  http client
+	 * @throws IOException create error
 	 */
 	protected WriteImpl(WriteOptions options, HttpClient client) throws IOException {
 		this(options, client, true);
 	}
 
+	/**
+	 * Create a write api instance with options and http client.
+	 * 
+	 * @param options write options
+	 * @param client  http client
+	 * @param startup if startup consumer threads
+	 * @throws IOException create error
+	 */
 	protected WriteImpl(WriteOptions options, HttpClient client, boolean startup) throws IOException {
 		this.options = options;
 		this.useGZip = options.isUseGZip();
@@ -114,7 +122,7 @@ public class WriteImpl implements Write {
 	/**
 	 * Put metric point.
 	 * 
-	 * @param point
+	 * @param point metric data point
 	 * @return if put successfully {@link boolean}
 	 */
 	@Override
@@ -132,11 +140,11 @@ public class WriteImpl implements Write {
 	/**
 	 * Put metric point with timeout.
 	 * 
-	 * @param point{@ling Point}
-	 * @param timeout     {@link long}
-	 * @param unit        {@link TimeUnit}
+	 * @param point   metric data point
+	 * @param timeout put timeput
+	 * @param unit    unit of timeout
 	 * @return if put successfully {@link boolean}
-	 * @throws InterruptedException
+	 * @throws InterruptedException thread interrupted
 	 */
 	@Override
 	public boolean put(Point point, long timeout, TimeUnit unit) throws InterruptedException {

@@ -30,9 +30,9 @@ public final class SimpleField implements Field {
 	/**
 	 * Create simple field instance.
 	 * 
-	 * @param name
-	 * @param type
-	 * @param value
+	 * @param name  field name
+	 * @param type  field type
+	 * @param value field value
 	 */
 	protected SimpleField(String name, FieldType type, double value) {
 		this.name = name;

@@ -28,7 +28,7 @@ public interface Write {
 	/**
 	 * Put metric point.
 	 * 
-	 * @param point
+	 * @param point metric data point
 	 * @return if put successfully {@link boolean}
 	 */
 	boolean put(Point point);
@@ -36,18 +36,18 @@ public interface Write {
 	/**
 	 * Put metric point with timeout.
 	 * 
-	 * @param point{@ling Point}
-	 * @param timeout     {@link long}
-	 * @param unit        {@link TimeUnit}
+	 * @param point   metric data point
+	 * @param timeout put timeput
+	 * @param unit    unit of timeout
 	 * @return if put successfully {@link boolean}
-	 * @throws InterruptedException
+	 * @throws InterruptedException thread interrupted
 	 */
 	boolean put(Point point, long timeout, TimeUnit unit) throws InterruptedException;
 
 	/**
 	 * Close write, release resources.
 	 * 
-	 * @throws Exception
+	 * @throws Exception close error
 	 */
 	void close() throws Exception;
 }
