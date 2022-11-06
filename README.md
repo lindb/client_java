@@ -2,7 +2,7 @@
 
 [![LICENSE](https://img.shields.io/github/license/lindb/client_java)](https://github.com/lindb/client_java/blob/main/LICENSE)
 [![codecov](https://codecov.io/gh/lindb/client_java/branch/main/graph/badge.svg)](https://codecov.io/gh/lindb/client_java)
-[![Github Actions Status](https://github.com/lindb/client_java/workflows/LinDB%20CI/badge.svg)](https://github.com/lindb/client_java/actions?query=workflow%3A%22LinDB+Client+Java+CI%22)
+[![Github Actions Status](https://github.com/lindb/client_java/workflows/LinDB%20Client%20Java%20CI/badge.svg)](https://github.com/lindb/client_java/actions?query=workflow%3A%22LinDB+Client+Java+CI%22)
 [![Maven Central](https://img.shields.io/maven-central/v/io.lindb/lindb-client)](https://repo1.maven.org/maven2/io/lindb/)
 
 This repository contains the reference Java client for LinDB.
