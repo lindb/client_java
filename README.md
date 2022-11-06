@@ -50,7 +50,7 @@ dependencies {
 
 ### Write data
 
-Example: [WritePoint.java](https://github.com/lindb/client_java/blob/src/test/java/io/lindb/client/example/WritePoint.java)
+Example: [WritePoint.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/WritePoint.java)
 
 ```java
 package io.lindb.client.example;
@@ -87,5 +87,6 @@ public class WritePoint {
 
 ### Options
 
-1. [HttpOptions](https://github.com/lindb/client_java/blob/src/main/java/io/lindb/client/internal/HttpOptions.java)
-2. [WriteOptions](https://github.com/lindb/client_java/blob/src/main/java/io/lindb/client/api/WriteOptions.java)
+1. [Options](https://github.com/lindb/client_java/blob/main/src/main/java/io/lindb/client/Options.java)
+2. [HttpOptions](https://github.com/lindb/client_java/blob/main/src/main/java/io/lindb/client/internal/HttpOptions.java)
+3. [WriteOptions](https://github.com/lindb/client_java/blob/main/src/main/java/io/lindb/client/api/WriteOptions.java)
