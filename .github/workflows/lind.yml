@@ -1,0 +1,35 @@
+name: LinDB Client Java CI
+on: [push, pull_request]
+jobs:
+  test-with-coverage:
+    name: Uint Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu' # See 'Supported distributions' for available options
+          java-version: '8'
+          cache: 'maven'
+      - name: Cache mvn dependencies
+        uses: actions/cache@v2.1.6
+        env:
+          cache-name: mvn-deps
+        with:
+          path: ~/.m2
+          key: ${{ env.cache-name }}-${{ hashFiles('pom.xml') }}
+          restore-keys: ${{ env.cache-name }}-
+      - name: Build with Maven
+        run: mvn package 
+      - name: Test with Maven
+        run: mvn test 
+      - name: Upload code coverage 
+        uses: codecov/codecov-action@v3 # https://github.com/codecov/codecov-action
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./target/site/jacoco/jacoco.xml
+          flags: unittests 
