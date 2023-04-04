@@ -23,11 +23,16 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientImplTest {
+	private final static Logger LOGGER = LoggerFactory.getLogger(ClientImplTest.class);
+
 	@Test
 	public void write() throws IOException {
 		Client client = new ClientImpl("http://localhost:9000", Options.builder().build());
 		assertNotNull(client.write("test"));
+		assertNotNull(client.write("test", (event, e) -> LOGGER.info("on error, event {}", event, e)));
 	}
 }

@@ -8,7 +8,7 @@ help:  ## display help
 header: ## check and add license header.
 	mvn license:format
 
-test: ## run test cases
+test: header## run test cases
 	# mvn test -Dtest=WriteImplTest
 	mvn test
 

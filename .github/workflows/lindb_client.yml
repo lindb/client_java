@@ -1,5 +1,9 @@
-name: LinDB Client Java CI
-on: [push, pull_request]
+name: LinDB Java Client CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main
 jobs:
   test-with-coverage:
     name: Build & Uint Test

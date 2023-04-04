@@ -18,6 +18,9 @@
  */
 package io.lindb.client.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.lindb.client.Client;
 import io.lindb.client.ClientFactory;
 import io.lindb.client.Options;
@@ -25,6 +28,8 @@ import io.lindb.client.api.Point;
 import io.lindb.client.api.Write;
 
 public class WritePoint {
+	private final static Logger LOGGER = LoggerFactory.getLogger(WritePoint.class);
+
 	public static void main(String[] args) throws Exception {
 		Options options = Options.builder()
 				.addDefaultTag("region", "shanghai")
@@ -33,7 +38,7 @@ public class WritePoint {
 		// create LinDB Client with broker endpoint
 		Client client = ClientFactory.create("http://localhost:9000", options);
 		// get write for database
-		Write write = client.write("_internal");
+		Write write = client.write("_internal", (event, e) -> LOGGER.error("on error, event {}", event, e));
 
 		for (int i = 0; i < 10; i++) {
 			Point point = Point.builder("host.cpu").addLast("load", 1.0)
