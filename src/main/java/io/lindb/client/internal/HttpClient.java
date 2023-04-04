@@ -35,7 +35,7 @@ import okhttp3.Response;
  * Http write client.
  */
 public class HttpClient {
-	private final static String USER_AGENT = String.format("lindb-client-java/%s (%s; %s) Java/%s", "0.0.1",
+	private final static String USER_AGENT = String.format("lindb-client-java/%s (%s; %s) Java/%s", "0.0.2",
 			System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("java.version"));
 
 	private final static MediaType MEDIT_FLAT = MediaType.parse("application/flatbuffer");

@@ -20,6 +20,7 @@ package io.lindb.client;
 
 import java.io.IOException;
 
+import io.lindb.client.api.EventListener;
 import io.lindb.client.api.Write;
 
 /**
@@ -34,4 +35,14 @@ public interface Client {
 	 * @throws IOException if send data error
 	 */
 	Write write(String database) throws IOException;
+
+	/**
+	 * Create write client.
+	 * 
+	 * @param database database name {@link String}
+	 * @param listener the listener to listen events
+	 * @return write client {@link Write}
+	 * @throws IOException if send data error
+	 */
+	Write write(String database, EventListener listener) throws IOException;
 }

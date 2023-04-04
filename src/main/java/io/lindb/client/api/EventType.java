@@ -18,36 +18,11 @@
  */
 package io.lindb.client.api;
 
-import java.util.concurrent.TimeUnit;
-
 /**
- * Write metric api.
+ * Event produced by {@link Write} when write metric failure.
  */
-public interface Write {
-
-	/**
-	 * Put metric point.
-	 * 
-	 * @param point metric data point
-	 * @return if put successfully {@link boolean}
-	 */
-	boolean put(Point point);
-
-	/**
-	 * Put metric point with timeout.
-	 * 
-	 * @param point   metric data point
-	 * @param timeout put timeput
-	 * @param unit    unit of timeout
-	 * @return if put successfully {@link boolean}
-	 * @throws InterruptedException thread interrupted
-	 */
-	boolean put(Point point, long timeout, TimeUnit unit) throws InterruptedException;
-
-	/**
-	 * Close write, release resources.
-	 * 
-	 * @throws Exception close error
-	 */
-	void close() throws Exception;
+public enum EventType {
+	decode,
+	send,
+	retry,
 }

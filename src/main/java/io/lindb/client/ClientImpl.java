@@ -20,6 +20,7 @@ package io.lindb.client;
 
 import java.io.IOException;
 
+import io.lindb.client.api.EventListener;
 import io.lindb.client.api.Write;
 import io.lindb.client.api.WriteFactory;
 import io.lindb.client.internal.HttpClient;
@@ -56,9 +57,24 @@ public class ClientImpl implements Client {
 	 */
 	@Override
 	public Write write(String database) throws IOException {
+		return write(database, null);
+	}
+
+	/**
+	 * Create async write client by given database name
+	 * 
+	 * @see io.lindb.client.Client#write(java.lang.String)
+	 * 
+	 * @param database database name {@link String}
+	 * @param listener the listener to listen events
+	 * @return write client {@link Write}
+	 * @throws IOException if send data error
+	 */
+	@Override
+	public Write write(String database, EventListener listener) throws IOException {
 		String url = String.format("%s%s?db=%s", this.brokerEndpoint, Constants.WRITE_API, database);
 		HttpClient client = new HttpClient(url, this.options.getHttpOptions());
-		return WriteFactory.createWrite(this.options.getWriteOptions(), client);
+		return WriteFactory.createWrite(this.options.getWriteOptions(), client, listener);
 	}
 
 }

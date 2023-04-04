@@ -26,16 +26,20 @@ import io.lindb.client.internal.HttpClient;
  * Write api create factory.
  */
 public class WriteFactory {
+
 	/**
 	 * Retrun write api based on given write options and http client.
 	 * 
-	 * @param options write options
-	 * @param client  http client
+	 * @param options  write options
+	 * @param client   httpn client
+	 * @param listener the listener to listen events
+	 *
 	 * @return write api {@link Write}
 	 * @throws IOException create error
 	 */
-	public static Write createWrite(WriteOptions options, HttpClient client) throws IOException {
-		return new WriteImpl(options, client);
+	public static Write createWrite(WriteOptions options, HttpClient client, EventListener listener)
+			throws IOException {
+		return new WriteImpl(options, client, listener);
 	}
 
 	private WriteFactory() {

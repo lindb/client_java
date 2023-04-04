@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.lindb.client.internal.HttpClient;
 import io.lindb.client.internal.HttpOptions;
@@ -35,6 +37,7 @@ import okhttp3.mockwebserver.RecordedRequest;
 import okhttp3.mockwebserver.SocketPolicy;
 
 public class WriteImplTest {
+	private final static Logger LOGGER = LoggerFactory.getLogger(WriteImplTest.class);
 	private HttpClient client;
 
 	@Before
@@ -45,7 +48,8 @@ public class WriteImplTest {
 	@Test
 	public void put() throws Exception {
 		WriteOptions options = WriteOptions.builder().flushInterval(1).batchQueue(1).build();
-		WriteImpl write = new WriteImpl(options, client, false);
+		WriteImpl write = new WriteImpl(options, client, false,
+				(event, e) -> LOGGER.error("on error, event {}", event, e));
 		Thread.sleep(10); // wait consume thread pause
 		Point point = Point.builder("test").addSum("sum", 1.0).build();
 		assertTrue(write.put(point));
@@ -88,7 +92,7 @@ public class WriteImplTest {
 	public void decodeFailure() throws Exception {
 		WriteOptions options = WriteOptions.builder().batchSize(1).build();
 		Point point = Point.builder("test").addField(new MockField()).build();
-		WriteImpl write = new WriteImpl(options, client);
+		WriteImpl write = new WriteImpl(options, client, (event, e) -> LOGGER.error("on error, event {}", event, e));
 		try {
 			write.put(point);
 			Thread.sleep(30);
@@ -185,7 +189,7 @@ public class WriteImplTest {
 		WriteOptions options = WriteOptions.builder().useGZip(false).flushInterval(30).maxRetries(2).batchSize(1)
 				.build();
 		Point point = Point.builder("test").addLast("last", 1.0).build();
-		WriteImpl write = new WriteImpl(options, client);
+		WriteImpl write = new WriteImpl(options, client, (event, e) -> LOGGER.error("on error, event {}", event, e));
 		try {
 			// test > batch size
 			write.put(point);
@@ -254,7 +258,7 @@ public class WriteImplTest {
 		WriteOptions options = WriteOptions.builder().flushInterval(30).retryQueue(1).maxRetries(2).batchSize(1)
 				.build();
 		Point point = Point.builder("test").addLast("last", 1.0).build();
-		WriteImpl write = new WriteImpl(options, client);
+		WriteImpl write = new WriteImpl(options, client, (event, e) -> LOGGER.error("on error, event {}", event, e));
 		try {
 			// test > batch size
 			write.put(point);

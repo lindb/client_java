@@ -55,6 +55,7 @@ public class WriteImpl implements Write {
 	private ByteArrayOutputStream buffer;
 	private HttpClient client;
 	private AtomicBoolean running;
+	private EventListener listener;
 	private final CountDownLatch latch;
 
 	/**
@@ -65,7 +66,19 @@ public class WriteImpl implements Write {
 	 * @throws IOException create error
 	 */
 	protected WriteImpl(WriteOptions options, HttpClient client) throws IOException {
-		this(options, client, true);
+		this(options, client, null);
+	}
+
+	/**
+	 * Create a write api instance with options and http client.
+	 * 
+	 * @param options  write options
+	 * @param client   http client
+	 * @param listener the listener to listen events
+	 * @throws IOException create error
+	 */
+	protected WriteImpl(WriteOptions options, HttpClient client, EventListener listener) throws IOException {
+		this(options, client, true, listener);
 	}
 
 	/**
@@ -77,6 +90,20 @@ public class WriteImpl implements Write {
 	 * @throws IOException create error
 	 */
 	protected WriteImpl(WriteOptions options, HttpClient client, boolean startup) throws IOException {
+		this(options, client, startup, null);
+	}
+
+	/**
+	 * Create a write api instance with options and http client.
+	 * 
+	 * @param options  write options
+	 * @param client   http client
+	 * @param startup  if startup consumer threads
+	 * @param listener the listener to listen events
+	 * @throws IOException create error
+	 */
+	protected WriteImpl(WriteOptions options, HttpClient client, boolean startup, EventListener listener)
+			throws IOException {
 		this.options = options;
 		this.useGZip = options.isUseGZip();
 		this.flushInterval = options.getFlushInterval();
@@ -91,6 +118,7 @@ public class WriteImpl implements Write {
 		this.buffer = new ByteArrayOutputStream();
 		this.builder = new RowBuilder();
 		this.running = new AtomicBoolean(true);
+		this.listener = listener;
 
 		if (startup) {
 			this.startup();
@@ -202,6 +230,7 @@ public class WriteImpl implements Write {
 					}
 				} catch (Throwable e) {
 					LOGGER.error("decode data point failure", e);
+					onError(EventType.decode, e);
 				} finally {
 					builder.reset();
 				}
@@ -220,6 +249,7 @@ public class WriteImpl implements Write {
 				}
 			} catch (Exception e) {
 				LOGGER.error("send last data failure when write close", e);
+				onError(EventType.send, e);
 			}
 
 			latch.countDown();
@@ -247,10 +277,12 @@ public class WriteImpl implements Write {
 					if (!sendData(outputStream, data)) {
 						if (!retryQueue.offer(new RetryEntry(data))) {
 							LOGGER.warn("cannot put data into retry queue ignore this data when send failure");
+							onError(EventType.retry, new RuntimeException("cannot put retry queue"));
 						}
 					}
 				} catch (Throwable e) {
 					LOGGER.error("send data point failure", e);
+					onError(EventType.send, e);
 				}
 			}
 			latch.countDown();
@@ -273,6 +305,7 @@ public class WriteImpl implements Write {
 						if (entry.getRetry() < maxRetry) {
 							if (!retryQueue.offer(entry)) {
 								LOGGER.warn("cannot put data into retry queue ignore this data when re-send failure");
+								onError(EventType.retry, new RuntimeException("retry too many times"));
 							}
 						} else {
 							LOGGER.warn("retry too many times ignore this data");
@@ -280,6 +313,7 @@ public class WriteImpl implements Write {
 					}
 				} catch (Throwable e) {
 					LOGGER.error("re-send data point failure", e);
+					onError(EventType.send, e);
 				}
 			}
 			latch.countDown();
@@ -313,4 +347,11 @@ public class WriteImpl implements Write {
 
 		return client.writeMetric(data, useGZip);
 	}
+
+	private void onError(EventType event, final Throwable e) {
+		if (this.listener != null) {
+			this.listener.onError(event, e);
+		}
+	}
+
 }
