@@ -20,7 +20,10 @@ package io.lindb.client;
 
 import java.io.IOException;
 
+import io.lindb.client.api.DataQuery;
 import io.lindb.client.api.EventListener;
+import io.lindb.client.api.MetadataManager;
+import io.lindb.client.api.StateQuery;
 import io.lindb.client.api.Write;
 
 /**
@@ -45,4 +48,25 @@ public interface Client {
 	 * @throws IOException if send data error
 	 */
 	Write write(String database, EventListener listener) throws IOException;
+
+	/**
+	 * Create metric data query client.
+	 * 
+	 * @return metric data client {@link DataQuery}
+	 */
+	DataQuery dataQuery();
+
+	/**
+	 * Create system state query client.
+	 * 
+	 * @return state query client {@link StateQuery}
+	 */
+	StateQuery stateQuery();
+
+	/**
+	 * Create metadata manager client.
+	 * 
+	 * @return metadata manager client {@link MetadataManager}
+	 */
+	MetadataManager metadataManager();
 }

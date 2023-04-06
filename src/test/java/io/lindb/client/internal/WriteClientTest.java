@@ -18,44 +18,36 @@
  */
 package io.lindb.client.internal;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+
+import java.io.IOException;
 
 import org.junit.Test;
 
 import io.lindb.client.Constants;
-import io.lindb.client.util.JsonUtil;
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-public class HttpClientTest {
+public class WriteClientTest {
 
 	@Test
-	public void put() throws Exception {
+	public void writeMetric() throws IOException {
 		// Create a MockWebServer.
 		MockWebServer server = new MockWebServer();
 		try {
-			server.enqueue(new MockResponse().setBody(JsonUtil.toString("ok")).setResponseCode(200));
+			server.enqueue(new MockResponse().setResponseCode(204));
 			server.enqueue(new MockResponse().setBody("write failure").setResponseCode(500));
 			// Start the server.
 			server.start();
 
-			HttpUrl baseUrl = server.url(Constants.EXEC_API);
-			HttpClient client = new HttpClient(HttpOptions.builder().build());
-			// put success
-			String result = client.put(baseUrl.toString(), "data", String.class);
-			assertEquals("ok", result);
-			boolean throwEx = false;
-			try {
-				// put failure
-				client.put(baseUrl.toString(), "data", String.class);
-				fail();
-			} catch (Exception e) {
-				throwEx = true;
-			}
-			assertTrue(throwEx);
+			HttpUrl baseUrl = server.url(Constants.WRITE_API);
+			WriteClient client = new WriteClient(baseUrl.toString(), HttpOptions.builder().build());
+			// write success
+			assertTrue(client.writeMetric("data".getBytes(), true));
+			// write failure
+			assertFalse(client.writeMetric("data".getBytes(), false));
 		} finally {
 			server.close();
 		}

@@ -18,20 +18,32 @@
  */
 package io.lindb.client.api;
 
-/**
- * Event produced by {@link Write} when write metric failure.
- */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+import io.lindb.client.util.JsonUtil;
+import okhttp3.mockwebserver.Dispatcher;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
+
+public class QueryHelper {
+
+	private QueryHelper() {
+
+	}
+
+	static MockWebServer mockServer(Object obj) throws Exception {
+		MockWebServer server = new MockWebServer();
+
+		final Dispatcher dispatcher = new Dispatcher() {
+			@Override
+			public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+				try {
+					return new MockResponse().setBody(JsonUtil.toString(obj)).setResponseCode(200);
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+			}
+		};
+		server.setDispatcher(dispatcher);
+		return server;
+	}
 }

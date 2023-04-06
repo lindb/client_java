@@ -26,6 +26,10 @@ public interface Constants {
 	 * Write api url path.
 	 */
 	String WRITE_API = "/api/v1/write";
+	/**
+	 * QL exec api url path.
+	 */
+	String EXEC_API = "/api/v1/exec";
 
 	/**
 	 * Default namesapce.

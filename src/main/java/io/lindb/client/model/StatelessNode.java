@@ -16,22 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Stateless node.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Data
+public class StatelessNode {
+	private String hostIp;
+	private String hostName;
+	private int grpcPort;
+	private int httpPort;
+	private String version;
+	private long onlineTime;
 }

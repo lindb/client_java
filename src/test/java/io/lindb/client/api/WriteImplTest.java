@@ -28,8 +28,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.lindb.client.internal.HttpClient;
 import io.lindb.client.internal.HttpOptions;
+import io.lindb.client.internal.WriteClient;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -38,11 +38,11 @@ import okhttp3.mockwebserver.SocketPolicy;
 
 public class WriteImplTest {
 	private final static Logger LOGGER = LoggerFactory.getLogger(WriteImplTest.class);
-	private HttpClient client;
+	private WriteClient client;
 
 	@Before
 	public void setup() {
-		client = new HttpClient("http://localhost:9000", HttpOptions.builder().build());
+		client = new WriteClient("http://localhost:9000", HttpOptions.builder().build());
 	}
 
 	@Test
@@ -112,7 +112,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().flushInterval(10).maxRetries(2).batchSize(20).build();
 		Point point = Point.builder("test").addLast("last", 1.0).build();
@@ -146,7 +146,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().flushInterval(10).sendQueue(10).maxRetries(2).batchSize(1)
 				.build();
@@ -184,7 +184,7 @@ public class WriteImplTest {
 		};
 		server.setDispatcher(dispatcher);
 
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().useGZip(false).flushInterval(30).maxRetries(2).batchSize(1)
 				.build();
@@ -225,7 +225,7 @@ public class WriteImplTest {
 		};
 		server.setDispatcher(dispatcher);
 
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().useGZip(false).flushInterval(30).maxRetries(2).batchSize(1)
 				.build();
@@ -253,7 +253,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().flushInterval(30).retryQueue(1).maxRetries(2).batchSize(1)
 				.build();
@@ -294,7 +294,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().flushInterval(30).retryQueue(1).maxRetries(2).batchSize(1)
 				.build();
@@ -325,7 +325,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
 				.build();
@@ -352,7 +352,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		HttpClient client = new HttpClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
 
 		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
 				.build();
@@ -366,5 +366,13 @@ public class WriteImplTest {
 			write.close();
 			server.close();
 		}
+	}
+
+	@Test
+	public void noEventListener() throws Exception {
+		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
+				.build();
+		WriteImpl write = new WriteImpl(options, client, false);
+		write.onError(EventType.send, new RuntimeException("no listener"));
 	}
 }

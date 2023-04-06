@@ -16,22 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import java.util.List;
+import java.util.Map;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Data family state.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Data
+public class DataFamilyState {
+	private int shardId;
+	private String familyTime;
+	private Map<Integer, Long> ackSequences;
+	private Map<Integer, Long> replicaSequences;
+	private List<MemoryDatabaseState> memoryDatabases;
 }

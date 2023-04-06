@@ -16,22 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Replicator state.
  */
-public enum EventType {
+@Data
+public class ReplicaPeerState {
+	private String replicator;
+	private String replicatorType;
+	private String consume;
+	private long ack;
+	private long pending;
 	/**
-	 * decode failure
+	 * 0: Unknown
+	 * 1: Init
+	 * 2: Ready
+	 * 3: Failure
 	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+	private int state;
+	private String stateErrMsg;
 }

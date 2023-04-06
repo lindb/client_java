@@ -21,7 +21,9 @@ package io.lindb.client.internal;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import io.lindb.client.util.JsonUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import okhttp3.Call;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -32,47 +34,49 @@ import okhttp3.Response;
 /**
  * Http write client.
  */
-public class HttpClient {
-	protected final static String USER_AGENT = String.format("lindb-client-java/%s (%s; %s) Java/%s", "0.0.3",
-			System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("java.version"));
-
-	public final static MediaType MEDIT_JSON = MediaType.parse("application/json");
+public class WriteClient {
+	private final static Logger LOGGER = LoggerFactory.getLogger(WriteClient.class);
+	private final static MediaType MEDIT_FLAT = MediaType.parse("application/flatbuffer");
 
 	private OkHttpClient client;
+	private String url;
 
 	/**
-	 * Create http clinet instance.
+	 * Create http write clinet instance.
 	 * 
+	 * @param url     write url path
 	 * @param options {@link HttpOptions}
 	 */
-	public HttpClient(HttpOptions options) {
+	public WriteClient(String url, HttpOptions options) {
+		this.url = url;
 		client = new OkHttpClient.Builder().connectTimeout(options.getConnectTimeout(), TimeUnit.SECONDS)
 				.writeTimeout(options.getWriteTimeout(), TimeUnit.SECONDS)
 				.readTimeout(options.getReadTimeout(), TimeUnit.SECONDS).build();
 	}
 
 	/**
-	 * Do http put request.
+	 * Write metric point data.
 	 * 
-	 * @param <T>    result type
-	 * @param url    url
-	 * @param params params
-	 * @param clazz  result class
-	 * @return result object
-	 * @throws Exception throws exception when request failure
+	 * @param data     write point data
+	 * @param compress if compress point data
+	 * @return if write successfully
+	 * @throws IOException when send error
 	 */
-	public <T> T put(String url, Object params, Class<T> clazz) throws Exception {
+	public boolean writeMetric(byte[] data, boolean compress) throws IOException {
 		Request.Builder rb = new Request.Builder()
-				.header("User-Agent", USER_AGENT)
+				.header("User-Agent", HttpClient.USER_AGENT)
 				.url(url);
-		Request request = rb.put(RequestBody.create(JsonUtil.toString(params), MEDIT_JSON)).build();
+		if (compress) {
+			rb.header("Content-Encoding", "gzip");
+		}
+		Request request = rb.put(RequestBody.create(data, MEDIT_FLAT)).build();
 		Call call = this.client.newCall(request);
 		try (Response response = call.execute()) {
-			String respBody = response.body().string();
-			if (response.code() < 400) {
-				return JsonUtil.toObject(respBody, clazz);
+			if (response.isSuccessful()) {
+				return true;
 			}
-			throw new IOException(respBody);
+			LOGGER.warn("write metric failure, error msg: {}", response.body().string());
+			return false;
 		}
 	}
 }

@@ -34,5 +34,8 @@ public class ClientImplTest {
 		Client client = new ClientImpl("http://localhost:9000", Options.builder().build());
 		assertNotNull(client.write("test"));
 		assertNotNull(client.write("test", (event, e) -> LOGGER.info("on error, event {}", event, e)));
+		assertNotNull(client.dataQuery());
+		assertNotNull(client.stateQuery());
+		assertNotNull(client.metadataManager());
 	}
 }
