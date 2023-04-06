@@ -30,6 +30,9 @@ public abstract class BaseQuery {
 
 	/**
 	 * Create base query instance.
+	 * 
+	 * @param url    url
+	 * @param client http client
 	 */
 	protected BaseQuery(String url, HttpClient client) {
 		this.url = url;

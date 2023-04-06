@@ -38,6 +38,8 @@ public interface DataQuery {
 	 * @return result set
 	 * @throws Exception throws exception when query failure
 	 */
+	/**
+	 */
 	ResultSet dataQuery(String database, String ql) throws Exception;
 
 	/**
@@ -46,6 +48,7 @@ public interface DataQuery {
 	 * Example:
 	 * show fields from lindb.runtime.mem
 	 * 
+	 * @param <T>      result type
 	 * @param database database name
 	 * @param ql       lin query language
 	 * @return result set
