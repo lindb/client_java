@@ -11,6 +11,9 @@ This repository contains the reference Java client for LinDB.
 - [How To Use](#how-to-use)
   - [Installation](#installation)
   - [Write Data](#write-data)
+  - [Data Query](#data-query)
+  - [State Query](#state-query)
+  - [Metadata Manager](#metadata-manager)
   - [Options](#options)
 
 ## Features
@@ -19,6 +22,12 @@ This repository contains the reference Java client for LinDB.
   - Write data use asynchronous
   - Support field type(sum/min/max/last/first/histogram)
   - [FlatBuf Protocol](https://github.com/lindb/common/blob/main/proto/v1/metrics.fbs)
+- Query
+  - Metric data/metadata
+  - Storage state
+  - Broker state
+  - Database state
+  - Replication state
 
 ## How To Use
 
@@ -36,7 +45,7 @@ Download the latest version:
 <dependency>
     <groupId>io.lindb</groupId>
     <artifactId>lindb-client</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.3</version>
 </dependency>
 ```
        
@@ -44,7 +53,7 @@ Download the latest version:
 
 ```groovy
 dependencies {
-    implementation "io.lindb:lindb-client:0.0.1"
+    implementation "io.lindb:lindb-client:0.0.3"
 }
 ```
 
@@ -84,6 +93,86 @@ public class WritePoint {
 	}
 }
 ```
+
+### Data query
+
+Example: [MetricDataQuery.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/MetricDataQuery.java)
+
+```java
+package io.lindb.client.example;
+
+import java.util.List;
+
+import io.lindb.client.Client;
+import io.lindb.client.ClientFactory;
+import io.lindb.client.Options;
+import io.lindb.client.api.DataQuery;
+import io.lindb.client.model.Field;
+import io.lindb.client.model.Metadata;
+import io.lindb.client.model.ResultSet;
+
+public class MetricDataQuery {
+
+	public static void main(String[] args) throws Exception {
+		Options options = Options.builder().build();
+		// create LinDB Client with broker endpoint
+		Client client = ClientFactory.create("http://localhost:9000", options);
+		// create metric data query
+		DataQuery query = client.dataQuery();
+		ResultSet rs = query.dataQuery("_internal",
+				"select heap_objects from lindb.runtime.mem where 'role' in ('Broker') group by node");
+		System.out.println(rs);
+		Metadata<List<String>> tags = query.metadataQuery("_internal", "show tag keys from lindb.runtime.mem");
+		System.out.println(tags);
+		Metadata<List<Field>> fields = query.metadataQuery("_internal", "show fields from lindb.runtime.mem");
+		System.out.println(fields);
+	}
+}
+```
+
+### State query
+
+Example: [StateQuery.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/StateQuery.java)
+
+```java
+package io.lindb.client.example;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import io.lindb.client.Client;
+import io.lindb.client.ClientFactory;
+import io.lindb.client.Options;
+import io.lindb.client.model.Master;
+
+public class StateQuery {
+	public static void main(String[] args) throws Exception {
+		Options options = Options.builder().build();
+		// create LinDB Client with broker endpoint
+		Client client = ClientFactory.create("http://localhost:9000", options);
+		// create state query api
+		io.lindb.client.api.StateQuery query = client.stateQuery();
+		System.out.println("master: =>" + query.master());
+		System.out.println("databases: =>" + query.databases());
+		System.out.println("database names: =>" + query.databaseNames());
+		System.out.println("broker alive nodes: =>" + query.brokerAliveNodes());
+		System.out.println("alive storages: =>" + query.aliveStorages());
+		System.out.println("storages: =>" + query.storages());
+		List<String> metrics = new ArrayList<>();
+		metrics.add("lindb.monitor.system.cpu_stat");
+		metrics.add("lindb.monitor.system.mem_stat");
+		System.out.println("broker runtime metrics: =>" + query.brokerMetrics(metrics));
+		System.out.println("storage runtime metrics: =>" + query.stroageMetrics("/lindb-cluster", metrics));
+		System.out.println("replication state: =>" + query.dataFamilyState("/lindb-cluster", "_internal"));
+		System.out.println("data family state: =>" + query.replicationState("/lindb-cluster", "_internal"));
+		System.out.println("common ql: =>" + query.query("show master", Master.class));
+	}
+}
+```
+
+### Metadata manager
+
+Example: [MetadataManager.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/MetadataManager.java)
 
 ### Options
 
