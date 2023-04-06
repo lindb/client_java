@@ -29,6 +29,9 @@ public class DataQueryImpl extends BaseQuery implements DataQuery {
 
 	/**
 	 * Create data query instance.
+	 * 
+	 * @param url    url
+	 * @param client http client
 	 */
 	public DataQueryImpl(String url, HttpClient client) {
 		super(url, client);

@@ -34,8 +34,8 @@ public class MetadataManagerImpl implements MetadataManager {
 	/**
 	 * Create metadata manager instance.
 	 * 
-	 * @param url
-	 * @param client
+	 * @param url    url
+	 * @param client http client
 	 */
 	public MetadataManagerImpl(String url, HttpClient client) {
 		this.url = url;

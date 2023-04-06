@@ -40,6 +40,9 @@ public class StateQueryImpl extends BaseQuery implements StateQuery {
 
 	/**
 	 * Create state query instance.
+	 * 
+	 * @param url    url
+	 * @param client http client
 	 */
 	public StateQueryImpl(String url, HttpClient client) {
 		super(url, client);

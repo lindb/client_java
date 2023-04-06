@@ -53,8 +53,9 @@ public class JsonUtil {
 	/**
 	 * Json string to object
 	 * 
-	 * @param json json string
-	 * @param <T>  Object type
+	 * @param json  json string
+	 * @param <T>   Object type
+	 * @param clazz result class
 	 * @return T object
 	 * @throws Exception throws exception when fail
 	 */
