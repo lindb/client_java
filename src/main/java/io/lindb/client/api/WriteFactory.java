@@ -20,7 +20,7 @@ package io.lindb.client.api;
 
 import java.io.IOException;
 
-import io.lindb.client.internal.HttpClient;
+import io.lindb.client.internal.WriteClient;
 
 /**
  * Write api create factory.
@@ -31,13 +31,13 @@ public class WriteFactory {
 	 * Retrun write api based on given write options and http client.
 	 * 
 	 * @param options  write options
-	 * @param client   httpn client
+	 * @param client   http write client
 	 * @param listener the listener to listen events
 	 *
 	 * @return write api {@link Write}
 	 * @throws IOException create error
 	 */
-	public static Write createWrite(WriteOptions options, HttpClient client, EventListener listener)
+	public static Write createWrite(WriteOptions options, WriteClient client, EventListener listener)
 			throws IOException {
 		return new WriteImpl(options, client, listener);
 	}

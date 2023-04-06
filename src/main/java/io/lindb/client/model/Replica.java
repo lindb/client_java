@@ -16,22 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import java.util.List;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Replica information.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Data
+public class Replica {
+	private List<Integer> replicas;
 }

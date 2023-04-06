@@ -16,22 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Metric metadata result set.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Data
+public class Metadata<T> {
+	private String type;
+	private T values;
 }

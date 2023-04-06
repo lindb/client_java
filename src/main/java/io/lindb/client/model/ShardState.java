@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Shard state.
  */
-public enum EventType {
+@Data
+public class ShardState {
+	private int id;
+	private int leader;
 	/**
-	 * decode failure
+	 * 0: Unknown
+	 * 1: New
+	 * 2: Online
+	 * 3: Offline
+	 * 4: NonExistent
 	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+	private int state;
+	private Replica replica;
 }

@@ -18,36 +18,30 @@
  */
 package io.lindb.client.example;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.List;
 
 import io.lindb.client.Client;
 import io.lindb.client.ClientFactory;
 import io.lindb.client.Options;
-import io.lindb.client.api.Point;
-import io.lindb.client.api.Write;
+import io.lindb.client.api.DataQuery;
+import io.lindb.client.model.Field;
+import io.lindb.client.model.Metadata;
+import io.lindb.client.model.ResultSet;
 
-public class WritePoint {
-	private final static Logger LOGGER = LoggerFactory.getLogger(WritePoint.class);
+public class MetricDataQuery {
 
 	public static void main(String[] args) throws Exception {
-		Options options = Options.builder()
-				.addDefaultTag("region", "shanghai")
-				.useGZip(true).batchSize(5).flushInterval(1000)
-				.build();
+		Options options = Options.builder().build();
 		// create LinDB Client with broker endpoint
 		Client client = ClientFactory.create("http://localhost:9000", options);
-		// get write for database
-		Write write = client.write("java", (event, e) -> LOGGER.error("on error, event {}", event, e));
-
-		for (int i = 0; i < 10; i++) {
-			Point point = Point.builder("host.cpu").addLast("load", 1.0)
-					.addTag("ip", "1.1.1." + i).build();
-			boolean ok = write.put(point);
-			System.out.println("write status: " + ok);
-		}
-		// need close write after write done
-		write.close();
-		System.out.println("done");
+		// create metric data query
+		DataQuery query = client.dataQuery();
+		ResultSet rs = query.dataQuery("_internal",
+				"select heap_objects from lindb.runtime.mem where 'role' in ('Broker') group by node");
+		System.out.println(rs);
+		Metadata<List<String>> tags = query.metadataQuery("_internal", "show tag keys from lindb.runtime.mem");
+		System.out.println(tags);
+		Metadata<List<Field>> fields = query.metadataQuery("_internal", "show fields from lindb.runtime.mem");
+		System.out.println(fields);
 	}
 }

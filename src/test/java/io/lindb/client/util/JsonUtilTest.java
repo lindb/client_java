@@ -16,22 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.util;
 
-/**
- * Event produced by {@link Write} when write metric failure.
- */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+public class JsonUtilTest {
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void json() throws Exception {
+		List<String> strs = new ArrayList<>();
+		strs.add("a");
+		String json = JsonUtil.toString(strs);
+		List<String> newStrs = JsonUtil.toObject(json, List.class);
+		assertEquals("a", newStrs.get(0));
+	}
 }

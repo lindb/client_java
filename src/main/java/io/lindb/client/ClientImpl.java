@@ -20,10 +20,17 @@ package io.lindb.client;
 
 import java.io.IOException;
 
+import io.lindb.client.api.DataQuery;
+import io.lindb.client.api.DataQueryImpl;
 import io.lindb.client.api.EventListener;
+import io.lindb.client.api.MetadataManager;
+import io.lindb.client.api.MetadataManagerImpl;
+import io.lindb.client.api.StateQuery;
+import io.lindb.client.api.StateQueryImpl;
 import io.lindb.client.api.Write;
 import io.lindb.client.api.WriteFactory;
 import io.lindb.client.internal.HttpClient;
+import io.lindb.client.internal.WriteClient;
 
 /**
  * ClientImpl implements {@link Client} interface
@@ -73,8 +80,50 @@ public class ClientImpl implements Client {
 	@Override
 	public Write write(String database, EventListener listener) throws IOException {
 		String url = String.format("%s%s?db=%s", this.brokerEndpoint, Constants.WRITE_API, database);
-		HttpClient client = new HttpClient(url, this.options.getHttpOptions());
+		WriteClient client = new WriteClient(url, this.options.getHttpOptions());
 		return WriteFactory.createWrite(this.options.getWriteOptions(), client, listener);
+	}
+
+	/**
+	 * Create metric data query client.
+	 * 
+	 * @see io.lindb.client.Client#dataQuery()
+	 * 
+	 * @return metric data client {@link DataQuery}
+	 */
+	@Override
+	public DataQuery dataQuery() {
+		String url = String.format("%s%s", this.brokerEndpoint, Constants.EXEC_API);
+		HttpClient client = new HttpClient(this.options.getHttpOptions());
+		return new DataQueryImpl(url, client);
+	}
+
+	/**
+	 * Create system state query client.
+	 * 
+	 * @see io.lindb.client.Client#stateQuery()
+	 * 
+	 * @return state query client {@link StateQuery}
+	 */
+	@Override
+	public StateQuery stateQuery() {
+		String url = String.format("%s%s", this.brokerEndpoint, Constants.EXEC_API);
+		HttpClient client = new HttpClient(this.options.getHttpOptions());
+		return new StateQueryImpl(url, client);
+	}
+
+	/**
+	 * Create metadata manager client.
+	 * 
+	 * @see io.lindb.client.Client#metadataManager()
+	 * 
+	 * @return metadata manager client {@link MetadataManager}
+	 */
+	@Override
+	public MetadataManager metadataManager() {
+		String url = String.format("%s%s", this.brokerEndpoint, Constants.EXEC_API);
+		HttpClient client = new HttpClient(this.options.getHttpOptions());
+		return new MetadataManagerImpl(url, client);
 	}
 
 }

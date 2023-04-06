@@ -16,22 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import java.util.List;
+import java.util.Map;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Runtime metric data.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Data
+public class RuntimeMetric {
+	private Map<String, String> tags;
+	private List<FieldValue> fields;
 }

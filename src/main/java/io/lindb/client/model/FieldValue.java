@@ -16,22 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Field value.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Setter
+@Getter
+public class FieldValue extends Field {
+	private double value;
 }

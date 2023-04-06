@@ -16,22 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Stroage configuration.
  */
-public enum EventType {
+@Data
+public class StorageCluster {
+	private ClusterConfig config;
 	/**
-	 * decode failure
+	 * 0: Unknown
+	 * 1: Initialize
+	 * 2: Ready
 	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+	private int status;
 }

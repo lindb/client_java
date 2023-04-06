@@ -18,20 +18,35 @@
  */
 package io.lindb.client.api;
 
+import io.lindb.client.model.ClusterConfig;
+import io.lindb.client.model.Database;
+
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Metadata manager interface(storage/database).
  */
-public enum EventType {
+public interface MetadataManager {
+
 	/**
-	 * decode failure
+	 * Create storage cluster.
+	 * 
+	 * @param config cluster config
+	 * @throws Exception throws exception when fail
 	 */
-	decode,
+	void createStorage(ClusterConfig config) throws Exception;
+
 	/**
-	 * send failure
+	 * Create database.
+	 * 
+	 * @param database database config
+	 * @throws Exception throws exception when fail
 	 */
-	send,
+	void createDatabase(Database database) throws Exception;
+
 	/**
-	 * retry failure
+	 * Drop database.
+	 * 
+	 * @param name database name
+	 * @throws Exception throws exception when fail
 	 */
-	retry,
+	void dropDatabase(String name) throws Exception;
 }

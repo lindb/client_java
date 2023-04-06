@@ -18,20 +18,23 @@
  */
 package io.lindb.client.api;
 
-/**
- * Event produced by {@link Write} when write metric failure.
- */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+import static org.junit.Assert.assertNotNull;
+
+import org.junit.Test;
+
+import io.lindb.client.internal.HttpClient;
+import io.lindb.client.internal.HttpOptions;
+import io.lindb.client.model.ResultSet;
+import okhttp3.mockwebserver.MockWebServer;
+
+public class DataQueryImplTest {
+	@Test
+	public void metricData() throws Exception {
+		try (MockWebServer server = QueryHelper.mockServer(new ResultSet())) {
+			HttpClient client = new HttpClient(HttpOptions.builder().build());
+			DataQueryImpl query = new DataQueryImpl(server.url("exec").toString(), client);
+			assertNotNull(query.dataQuery("test", "select load from cpu"));
+			assertNotNull(query.metadataQuery("test", "show fields from cpu"));
+		}
+	}
 }

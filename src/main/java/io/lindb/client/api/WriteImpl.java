@@ -33,7 +33,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.lindb.client.internal.HttpClient;
+import io.lindb.client.internal.WriteClient;
 
 /**
  * Implement an async write api.
@@ -53,7 +53,7 @@ public class WriteImpl implements Write {
 	private BlockingQueue<RetryEntry> retryQueue;
 	private RowBuilder builder;
 	private ByteArrayOutputStream buffer;
-	private HttpClient client;
+	private WriteClient client;
 	private AtomicBoolean running;
 	private EventListener listener;
 	private final CountDownLatch latch;
@@ -65,7 +65,7 @@ public class WriteImpl implements Write {
 	 * @param client  http client
 	 * @throws IOException create error
 	 */
-	protected WriteImpl(WriteOptions options, HttpClient client) throws IOException {
+	protected WriteImpl(WriteOptions options, WriteClient client) throws IOException {
 		this(options, client, null);
 	}
 
@@ -73,11 +73,11 @@ public class WriteImpl implements Write {
 	 * Create a write api instance with options and http client.
 	 * 
 	 * @param options  write options
-	 * @param client   http client
+	 * @param client   http write client
 	 * @param listener the listener to listen events
 	 * @throws IOException create error
 	 */
-	protected WriteImpl(WriteOptions options, HttpClient client, EventListener listener) throws IOException {
+	protected WriteImpl(WriteOptions options, WriteClient client, EventListener listener) throws IOException {
 		this(options, client, true, listener);
 	}
 
@@ -85,11 +85,11 @@ public class WriteImpl implements Write {
 	 * Create a write api instance with options and http client.
 	 * 
 	 * @param options write options
-	 * @param client  http client
+	 * @param client  http write client
 	 * @param startup if startup consumer threads
 	 * @throws IOException create error
 	 */
-	protected WriteImpl(WriteOptions options, HttpClient client, boolean startup) throws IOException {
+	protected WriteImpl(WriteOptions options, WriteClient client, boolean startup) throws IOException {
 		this(options, client, startup, null);
 	}
 
@@ -97,12 +97,12 @@ public class WriteImpl implements Write {
 	 * Create a write api instance with options and http client.
 	 * 
 	 * @param options  write options
-	 * @param client   http client
+	 * @param client   http write client
 	 * @param startup  if startup consumer threads
 	 * @param listener the listener to listen events
 	 * @throws IOException create error
 	 */
-	protected WriteImpl(WriteOptions options, HttpClient client, boolean startup, EventListener listener)
+	protected WriteImpl(WriteOptions options, WriteClient client, boolean startup, EventListener listener)
 			throws IOException {
 		this.options = options;
 		this.useGZip = options.isUseGZip();
@@ -348,7 +348,13 @@ public class WriteImpl implements Write {
 		return client.writeMetric(data, useGZip);
 	}
 
-	private void onError(EventType event, final Throwable e) {
+	/**
+	 * Invoke when throw exception
+	 * 
+	 * @param event event type
+	 * @param e     expcetion
+	 */
+	protected void onError(EventType event, final Throwable e) {
 		if (this.listener != null) {
 			this.listener.onError(event, e);
 		}

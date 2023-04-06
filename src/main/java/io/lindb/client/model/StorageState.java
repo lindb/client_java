@@ -16,22 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import java.util.Map;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Storage state.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Data
+public class StorageState {
+	private String name;
+	// node id -> node
+	private Map<Integer, StatefulNode> liveNodes;
+	// databaes name -> shard assignment
+	private Map<String, ShardAssignment> shardAssignments;
+	// database name -> [shard id -> shard state]
+	private Map<String, Map<Integer, ShardState>> shardStates;
 }

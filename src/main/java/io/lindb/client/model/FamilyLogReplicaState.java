@@ -16,22 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.model;
+
+import java.util.List;
+
+import lombok.Data;
 
 /**
- * Event produced by {@link Write} when write metric failure.
+ * Family wal replica state.
  */
-public enum EventType {
-	/**
-	 * decode failure
-	 */
-	decode,
-	/**
-	 * send failure
-	 */
-	send,
-	/**
-	 * retry failure
-	 */
-	retry,
+@Data
+public class FamilyLogReplicaState {
+	private int shardId;
+	private String familyTime;
+	private int leader;
+	private long append;
+	private List<ReplicaPeerState> replicators;
 }
