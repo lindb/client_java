@@ -19,7 +19,7 @@ This repository contains the reference Java client for LinDB.
 ## Features
 
 - Write data
-  - Write data use asynchronous
+  - Write data use asynchronous/synchronous
   - Support field type(sum/min/max/last/first/histogram)
   - [FlatBuf Protocol](https://github.com/lindb/common/blob/main/proto/v1/metrics.fbs)
 - Query
@@ -45,7 +45,7 @@ Download the latest version:
 <dependency>
     <groupId>io.lindb</groupId>
     <artifactId>lindb-client</artifactId>
-    <version>0.0.3</version>
+    <version>0.1.0</version>
 </dependency>
 ```
        
@@ -53,13 +53,15 @@ Download the latest version:
 
 ```groovy
 dependencies {
-    implementation "io.lindb:lindb-client:0.0.3"
+    implementation "io.lindb:lindb-client:0.1.0"
 }
 ```
 
 ### Write data
 
-Example: [WritePoint.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/WritePoint.java)
+Example: 
+- [Asynchronous write](./src/test/java/io/lindb/client/example/WritePoint.java)
+- [Synchronous write](./src/test/java/io/lindb/client/example/BlockingWritePoint.java)
 
 ```java
 package io.lindb.client.example;
@@ -90,13 +92,14 @@ public class WritePoint {
 		// need close write after write done
 		write.close();
 		System.out.println("done");
+		client.close();
 	}
 }
 ```
 
 ### Data query
 
-Example: [MetricDataQuery.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/MetricDataQuery.java)
+Example: [MetricDataQuery.java](./src/test/java/io/lindb/client/example/MetricDataQuery.java)
 
 ```java
 package io.lindb.client.example;
@@ -126,13 +129,14 @@ public class MetricDataQuery {
 		System.out.println(tags);
 		Metadata<List<Field>> fields = query.metadataQuery("_internal", "show fields from lindb.runtime.mem");
 		System.out.println(fields);
+		client.close();
 	}
 }
 ```
 
 ### State query
 
-Example: [StateQuery.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/StateQuery.java)
+Example: [StateQuery.java](./src/test/java/io/lindb/client/example/StateQuery.java)
 
 ```java
 package io.lindb.client.example;
@@ -166,16 +170,17 @@ public class StateQuery {
 		System.out.println("replication state: =>" + query.dataFamilyState("/lindb-cluster", "_internal"));
 		System.out.println("data family state: =>" + query.replicationState("/lindb-cluster", "_internal"));
 		System.out.println("common ql: =>" + query.query("show master", Master.class));
+		client.close();
 	}
 }
 ```
 
 ### Metadata manager
 
-Example: [MetadataManager.java](https://github.com/lindb/client_java/blob/main/src/test/java/io/lindb/client/example/MetadataManager.java)
+Example: [MetadataManager.java](./src/test/java/io/lindb/client/example/MetadataManager.java)
 
 ### Options
 
-1. [Options](https://github.com/lindb/client_java/blob/main/src/main/java/io/lindb/client/Options.java)
-2. [HttpOptions](https://github.com/lindb/client_java/blob/main/src/main/java/io/lindb/client/internal/HttpOptions.java)
-3. [WriteOptions](https://github.com/lindb/client_java/blob/main/src/main/java/io/lindb/client/api/WriteOptions.java)
+1. [Options](./src/main/java/io/lindb/client/Options.java)
+2. [HttpOptions](./src/main/java/io/lindb/client/internal/HttpOptions.java)
+3. [WriteOptions](./src/main/java/io/lindb/client/api/WriteOptions.java)

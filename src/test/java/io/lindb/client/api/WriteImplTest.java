@@ -21,6 +21,7 @@ package io.lindb.client.api;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -28,7 +29,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.lindb.client.internal.HttpOptions;
+import io.lindb.client.internal.BaseClientTest;
 import io.lindb.client.internal.WriteClient;
 import okhttp3.mockwebserver.Dispatcher;
 import okhttp3.mockwebserver.MockResponse;
@@ -36,20 +37,20 @@ import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import okhttp3.mockwebserver.SocketPolicy;
 
-public class WriteImplTest {
+public class WriteImplTest extends BaseClientTest {
 	private final static Logger LOGGER = LoggerFactory.getLogger(WriteImplTest.class);
 	private WriteClient client;
 
 	@Before
 	public void setup() {
-		client = new WriteClient("http://localhost:9000", HttpOptions.builder().build());
+		client = new WriteClient("http://localhost:9000", cli);
 	}
 
 	@Test
 	public void put() throws Exception {
 		WriteOptions options = WriteOptions.builder().flushInterval(1).batchQueue(1).build();
 		WriteImpl write = new WriteImpl(options, client, false,
-				(event, e) -> LOGGER.error("on error, event {}", event, e));
+				(event, points, e) -> LOGGER.error("on error, event {}, points {}", event, points, e));
 		Thread.sleep(10); // wait consume thread pause
 		Point point = Point.builder("test").addSum("sum", 1.0).build();
 		assertTrue(write.put(point));
@@ -92,7 +93,8 @@ public class WriteImplTest {
 	public void decodeFailure() throws Exception {
 		WriteOptions options = WriteOptions.builder().batchSize(1).build();
 		Point point = Point.builder("test").addField(new MockField()).build();
-		WriteImpl write = new WriteImpl(options, client, (event, e) -> LOGGER.error("on error, event {}", event, e));
+		WriteImpl write = new WriteImpl(options, client,
+				(event, points, e) -> LOGGER.error("on error, event {},points {}", event, points, e));
 		try {
 			write.put(point);
 			Thread.sleep(30);
@@ -112,7 +114,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().flushInterval(10).maxRetries(2).batchSize(20).build();
 		Point point = Point.builder("test").addLast("last", 1.0).build();
@@ -146,7 +148,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().flushInterval(10).sendQueue(10).maxRetries(2).batchSize(1)
 				.build();
@@ -184,12 +186,13 @@ public class WriteImplTest {
 		};
 		server.setDispatcher(dispatcher);
 
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().useGZip(false).flushInterval(30).maxRetries(2).batchSize(1)
 				.build();
 		Point point = Point.builder("test").addLast("last", 1.0).build();
-		WriteImpl write = new WriteImpl(options, client, (event, e) -> LOGGER.error("on error, event {}", event, e));
+		WriteImpl write = new WriteImpl(options, client,
+				(event, points, e) -> LOGGER.error("on error, event {}, points {}", event, points, e));
 		try {
 			// test > batch size
 			write.put(point);
@@ -225,7 +228,7 @@ public class WriteImplTest {
 		};
 		server.setDispatcher(dispatcher);
 
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().useGZip(false).flushInterval(30).maxRetries(2).batchSize(1)
 				.build();
@@ -248,17 +251,18 @@ public class WriteImplTest {
 		final Dispatcher dispatcher = new Dispatcher() {
 			@Override
 			public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
-				Thread.sleep(10);
+				Thread.sleep(50);
 				return new MockResponse().setResponseCode(500);
 			}
 		};
 		server.setDispatcher(dispatcher);
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().flushInterval(30).retryQueue(1).maxRetries(2).batchSize(1)
 				.build();
 		Point point = Point.builder("test").addLast("last", 1.0).build();
-		WriteImpl write = new WriteImpl(options, client, (event, e) -> LOGGER.error("on error, event {}", event, e));
+		WriteImpl write = new WriteImpl(options, client,
+				(event, points, e) -> LOGGER.error("on error, event {}, points {}", event, points, e));
 		try {
 			// test > batch size
 			write.put(point);
@@ -294,7 +298,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().flushInterval(30).retryQueue(1).maxRetries(2).batchSize(1)
 				.build();
@@ -325,7 +329,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
 				.build();
@@ -352,7 +356,7 @@ public class WriteImplTest {
 			}
 		};
 		server.setDispatcher(dispatcher);
-		WriteClient client = new WriteClient(server.url("/test").toString(), HttpOptions.builder().build());
+		WriteClient client = new WriteClient(server.url("/test").toString(), cli);
 
 		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
 				.build();
@@ -373,6 +377,75 @@ public class WriteImplTest {
 		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
 				.build();
 		WriteImpl write = new WriteImpl(options, client, false);
-		write.onError(EventType.send, new RuntimeException("no listener"));
+		write.onError(EventType.send, new ArrayList<>(), new RuntimeException("no listener"));
+	}
+
+	@Test
+	public void retryConsumer() throws Exception {
+		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
+				.build();
+		WriteImpl write = new WriteImpl(options, client, false);
+		assertTrue(write.retryConsumer.isRunning());
+		write.retryQueue.add(new WriteEntry(null, null));
+		write.retryConsumer.process();
+		write.running.set(false);
+		assertFalse(write.retryConsumer.isRunning());
+		// no running pending data
+		write.retryQueue.put(new WriteEntry(new byte[] { 1, 2, 3 }, new ArrayList<>()));
+		assertTrue(write.retryConsumer.isRunning());
+		write.retryConsumer.process();
+		write.retryQueue.put(new WriteEntry(new byte[] { 1, 2, 3 }, null));
+		write.retryConsumer.process();
+
+		write.retryQueue = null;
+		write.retryConsumer.process();
+	}
+
+	@Test
+	public void sendConsumer() throws Exception {
+		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
+				.build();
+		WriteImpl write = new WriteImpl(options, client, false);
+		assertTrue(write.sendConsumer.isRunning());
+		write.sendBuffers.put(new WriteEntry(null, null));
+		write.running.set(false);
+		assertTrue(write.sendConsumer.isRunning());
+		// running no data
+		write.sendConsumer.process();
+		assertFalse(write.sendConsumer.isRunning());
+		// no running pending data
+		write.sendBuffers.put(new WriteEntry(new byte[] { 1, 2, 3 }, new ArrayList<>()));
+		write.sendConsumer.process();
+		write.sendBuffers.put(new WriteEntry(new byte[] { 1, 2, 3 }, null));
+		write.sendConsumer.process();
+
+		write.sendBuffers = null;
+		write.sendConsumer.process();
+	}
+
+	@Test
+	public void decodeConsumer() throws Exception {
+		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
+				.build();
+		WriteImpl write = new WriteImpl(options, client, false);
+		Point point = Point.builder("done").addLast("last", 1.0).build();
+		write.points.put(point);
+		write.decodeConsumer.processPending();
+
+		write.points = null;
+		write.decodeConsumer.processPending();
+		write.decodeConsumer.process();
+	}
+
+	@Test
+	public void sendConsumer_isRunning() throws Exception {
+		WriteOptions options = WriteOptions.builder().retryQueue(1).maxRetries(2)
+				.build();
+		WriteImpl write = new WriteImpl(options, client, false);
+		assertTrue(write.sendConsumer.isRunning());
+		write.running.set(false);
+		assertFalse(write.sendConsumer.isRunning());
+		write.sendBuffers.put(new WriteEntry(null, null));
+		assertTrue(write.sendConsumer.isRunning());
 	}
 }

@@ -20,6 +20,9 @@ package io.lindb.client.api;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -48,15 +51,20 @@ public class WriteImpl implements Write {
 	private final int maxRetry;
 	private final Map<String, String> defaultTags;
 
-	private BlockingQueue<Point> points;
-	private BlockingQueue<byte[]> sendBuffers;
-	private BlockingQueue<RetryEntry> retryQueue;
 	private RowBuilder builder;
 	private ByteArrayOutputStream buffer;
 	private WriteClient client;
-	private AtomicBoolean running;
 	private EventListener listener;
 	private final CountDownLatch latch;
+
+	BlockingQueue<Point> points;
+	BlockingQueue<WriteEntry> sendBuffers;
+	BlockingQueue<WriteEntry> retryQueue;
+
+	DecodeConsumer decodeConsumer;
+	SendConsumer sendConsumer;
+	RetryConsumer retryConsumer;
+	AtomicBoolean running;
 
 	/**
 	 * Create a write api instance with options and http client.
@@ -117,8 +125,11 @@ public class WriteImpl implements Write {
 		this.retryQueue = new ArrayBlockingQueue<>(this.options.getRetryQueue());
 		this.buffer = new ByteArrayOutputStream();
 		this.builder = new RowBuilder();
-		this.running = new AtomicBoolean(true);
 		this.listener = listener;
+		this.decodeConsumer = new DecodeConsumer();
+		this.sendConsumer = new SendConsumer();
+		this.retryConsumer = new RetryConsumer();
+		this.running = new AtomicBoolean(true);
 
 		if (startup) {
 			this.startup();
@@ -129,19 +140,19 @@ public class WriteImpl implements Write {
 
 	private void startup() throws IOException {
 		// decode process thread
-		Thread decodeProc = new Thread(new DecodeConsumer());
+		Thread decodeProc = new Thread(this.decodeConsumer);
 		decodeProc.setName("lin-decoder");
 		decodeProc.setDaemon(true);
 		decodeProc.start();
 
 		// send process thread
-		Thread sendProc = new Thread(new SendConsumer());
+		Thread sendProc = new Thread(this.sendConsumer);
 		sendProc.setName("lin-sender");
 		sendProc.setDaemon(true);
 		sendProc.start();
 
 		// retry send process thread
-		Thread resendProc = new Thread(new RetryConsumer());
+		Thread resendProc = new Thread(this.retryConsumer);
 		resendProc.setName("lin-re-sender");
 		resendProc.setDaemon(true);
 		resendProc.start();
@@ -188,6 +199,8 @@ public class WriteImpl implements Write {
 
 	class DecodeConsumer implements Runnable {
 		private int batch = 0;
+		private List<Point> batchPoints = new ArrayList<>();
+		long nextFlush = System.currentTimeMillis() + flushInterval;
 
 		private void batch(Point point) throws IOException {
 			try {
@@ -201,44 +214,64 @@ public class WriteImpl implements Write {
 
 		@Override
 		public void run() {
-			long nextFlush = System.currentTimeMillis() + flushInterval;
+
 			while (running.get()) {
-				try {
-					long now = System.currentTimeMillis();
-					long diff = nextFlush - now;
-					Point point = null;
-					if (diff > 0) {
-						// not reach next flush interval, poll with timeout
-						point = points.poll(diff, TimeUnit.MILLISECONDS);
-					} else {
-						point = points.poll();
-					}
-					if (point != null) {
-						// if point not null, batch it.
-						batch(point);
-					}
-
-					// check if need to send
-					if (batch >= batchSize || (batch > 0 && diff <= 0)) {
-						byte[] d = buffer.toByteArray();
-						buffer.reset();
-						sendBuffers.put(d);
-						batch = 0;
-						nextFlush = now + flushInterval;
-					} else if (diff <= 0) {
-						nextFlush = now + flushInterval;
-					}
-				} catch (Throwable e) {
-					LOGGER.error("decode data point failure", e);
-					onError(EventType.decode, e);
-				} finally {
-					builder.reset();
-				}
+				process();
 			}
+			processPending();
 
+			latch.countDown();
+		}
+
+		public void process() {
+			long now = System.currentTimeMillis();
+			long diff = this.nextFlush - now;
+			Point point = null;
+			try {
+				if (diff > 0) {
+					// not reach next flush interval, poll with timeout
+					point = points.poll(diff, TimeUnit.MILLISECONDS);
+				} else {
+					point = points.poll();
+				}
+				if (point != null) {
+					batchPoints.add(point);
+					// if point not null, batch it.
+					batch(point);
+				}
+				// set point null, handle event listen
+				point = null;
+				// check if need to send
+				if (batch >= batchSize || (batch > 0 && diff <= 0)) {
+					byte[] d = buffer.toByteArray();
+					buffer.reset();
+					sendBuffers.put(new WriteEntry(d, batchPoints));
+					batch = 0;
+					// reset new batch points after put send queue
+					batchPoints = new ArrayList<>();
+					this.nextFlush = now + flushInterval;
+				} else if (diff <= 0) {
+					this.nextFlush = now + flushInterval;
+				}
+			} catch (Throwable e) {
+				LOGGER.error("decode data point failure", e);
+				if (point != null) {
+					List<Point> failPoints = new ArrayList<>();
+					failPoints.add(point);
+					onError(EventType.decode, failPoints, e);
+				} else {
+					onError(EventType.decode, batchPoints, e);
+				}
+			} finally {
+				builder.reset();
+			}
+		}
+
+		public void processPending() {
+			Point[] pendingPoints = null;
 			try {
 				if (!points.isEmpty()) {
-					Point[] pendingPoints = points.toArray(new Point[0]);
+					pendingPoints = points.toArray(new Point[0]);
 					for (Point point : pendingPoints) {
 						batch(point);
 					}
@@ -249,10 +282,11 @@ public class WriteImpl implements Write {
 				}
 			} catch (Exception e) {
 				LOGGER.error("send last data failure when write close", e);
-				onError(EventType.send, e);
+				if (pendingPoints != null) {
+					List<Point> failPoints = Arrays.asList(pendingPoints);
+					onError(EventType.send, failPoints, e);
+				}
 			}
-
-			latch.countDown();
 		}
 	}
 
@@ -267,25 +301,45 @@ public class WriteImpl implements Write {
 
 		@Override
 		public void run() {
-			while (running.get() || (!running.get() && !sendBuffers.isEmpty())) {
-				try {
-					byte[] data = sendBuffers.take();
-					if (data.length == 0) {
-						// write closing
-						continue;
-					}
-					if (!sendData(outputStream, data)) {
-						if (!retryQueue.offer(new RetryEntry(data))) {
-							LOGGER.warn("cannot put data into retry queue ignore this data when send failure");
-							onError(EventType.retry, new RuntimeException("cannot put retry queue"));
-						}
-					}
-				} catch (Throwable e) {
-					LOGGER.error("send data point failure", e);
-					onError(EventType.send, e);
-				}
+			while (isRunning()) {
+				process();
 			}
 			latch.countDown();
+		}
+
+		/**
+		 * Check if consumer running
+		 * 
+		 * @return if running
+		 */
+		public boolean isRunning() {
+			return running.get() || (!running.get() && !sendBuffers.isEmpty());
+		}
+
+		/**
+		 * Consume and send metric data
+		 */
+		public void process() {
+			WriteEntry entry = null;
+			try {
+				entry = sendBuffers.take();
+				byte[] data = entry.getData();
+				if (data == null) {
+					// write closing
+					return;
+				}
+				if (!sendData(outputStream, data)) {
+					if (!retryQueue.offer(entry)) {
+						LOGGER.warn("cannot put data into retry queue ignore this data when send failure");
+						onError(EventType.retry, entry.getPoints(), new RuntimeException("cannot put retry queue"));
+					}
+				}
+			} catch (Throwable e) {
+				LOGGER.error("send data point failure", e);
+				if (entry != null && entry.getPoints() != null) {
+					onError(EventType.send, entry.getPoints(), e);
+				}
+			}
 		}
 	}
 
@@ -293,30 +347,42 @@ public class WriteImpl implements Write {
 
 		@Override
 		public void run() {
-			while (running.get() || (!running.get() && !retryQueue.isEmpty())) {
-				try {
-					RetryEntry entry = retryQueue.take();
-					if (entry.getData() == null) {
-						// write closing
-						continue;
-					}
-					entry.increaseRetry();
-					if (!client.writeMetric(entry.getData(), useGZip)) {
-						if (entry.getRetry() < maxRetry) {
-							if (!retryQueue.offer(entry)) {
-								LOGGER.warn("cannot put data into retry queue ignore this data when re-send failure");
-								onError(EventType.retry, new RuntimeException("retry too many times"));
-							}
-						} else {
-							LOGGER.warn("retry too many times ignore this data");
-						}
-					}
-				} catch (Throwable e) {
-					LOGGER.error("re-send data point failure", e);
-					onError(EventType.send, e);
-				}
+			while (isRunning()) {
+				process();
 			}
 			latch.countDown();
+		}
+
+		public boolean isRunning() {
+			return running.get() || (!running.get() && !retryQueue.isEmpty());
+		}
+
+		public void process() {
+			WriteEntry entry = null;
+			try {
+				entry = retryQueue.take();
+				if (entry.getData() == null) {
+					// write closing
+					return;
+				}
+				entry.increaseRetry();
+				if (!client.writeMetric(entry.getData(), useGZip)) {
+					if (entry.getRetry() < maxRetry) {
+						if (!retryQueue.offer(entry)) {
+							LOGGER.warn("cannot put data into retry queue ignore this data when re-send failure");
+							onError(EventType.retry, entry.getPoints(),
+									new RuntimeException("retry too many times"));
+						}
+					} else {
+						LOGGER.warn("retry too many times ignore this data");
+					}
+				}
+			} catch (Throwable e) {
+				LOGGER.error("re-send data point failure", e);
+				if (entry != null && entry.getPoints() != null) {
+					onError(EventType.send, entry.getPoints(), e);
+				}
+			}
 		}
 	}
 
@@ -329,8 +395,8 @@ public class WriteImpl implements Write {
 	public void close() throws Exception {
 		this.running.set(false);
 		// trigger consume thread close.
-		this.sendBuffers.put(new byte[] {});
-		this.retryQueue.put(new RetryEntry(null));
+		this.sendBuffers.put(new WriteEntry(null, null));
+		this.retryQueue.put(new WriteEntry(null, null));
 
 		latch.await(15, TimeUnit.SECONDS);
 	}
@@ -351,12 +417,13 @@ public class WriteImpl implements Write {
 	/**
 	 * Invoke when throw exception
 	 * 
-	 * @param event event type
-	 * @param e     expcetion
+	 * @param event  event type
+	 * @param points points of failed
+	 * @param e      expcetion
 	 */
-	protected void onError(EventType event, final Throwable e) {
+	protected void onError(EventType event, List<Point> points, final Throwable e) {
 		if (this.listener != null) {
-			this.listener.onError(event, e);
+			this.listener.onError(event, points, e);
 		}
 	}
 

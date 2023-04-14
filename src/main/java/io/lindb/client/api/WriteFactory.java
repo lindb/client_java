@@ -28,7 +28,7 @@ import io.lindb.client.internal.WriteClient;
 public class WriteFactory {
 
 	/**
-	 * Retrun write api based on given write options and http client.
+	 * Retrun an async write api based on given write options and http client.
 	 * 
 	 * @param options  write options
 	 * @param client   http write client
@@ -40,6 +40,20 @@ public class WriteFactory {
 	public static Write createWrite(WriteOptions options, WriteClient client, EventListener listener)
 			throws IOException {
 		return new WriteImpl(options, client, listener);
+	}
+
+	/**
+	 * Retrun a blocking write api based on given write options and http client.
+	 * 
+	 * @param options write options
+	 * @param client  http write client
+	 *
+	 * @return write api {@link BlockingWrite}
+	 * @throws IOException create error
+	 */
+	public static BlockingWrite createBlockingWrite(WriteOptions options, WriteClient client)
+			throws IOException {
+		return new BlockingWriteImpl(options, client);
 	}
 
 	private WriteFactory() {

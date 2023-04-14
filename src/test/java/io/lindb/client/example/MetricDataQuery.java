@@ -43,5 +43,6 @@ public class MetricDataQuery {
 		System.out.println(tags);
 		Metadata<List<Field>> fields = query.metadataQuery("_internal", "show fields from lindb.runtime.mem");
 		System.out.println(fields);
+		client.close();
 	}
 }

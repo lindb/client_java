@@ -19,7 +19,9 @@
 package io.lindb.client;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import io.lindb.client.api.BlockingWrite;
 import io.lindb.client.api.DataQuery;
 import io.lindb.client.api.DataQueryImpl;
 import io.lindb.client.api.EventListener;
@@ -30,7 +32,9 @@ import io.lindb.client.api.StateQueryImpl;
 import io.lindb.client.api.Write;
 import io.lindb.client.api.WriteFactory;
 import io.lindb.client.internal.HttpClient;
+import io.lindb.client.internal.HttpOptions;
 import io.lindb.client.internal.WriteClient;
+import okhttp3.OkHttpClient;
 
 /**
  * ClientImpl implements {@link Client} interface
@@ -38,6 +42,7 @@ import io.lindb.client.internal.WriteClient;
 public class ClientImpl implements Client {
 	private final String brokerEndpoint;
 	private final Options options;
+	private final OkHttpClient client;
 
 	/**
 	 * Create LinDB client instance
@@ -48,6 +53,10 @@ public class ClientImpl implements Client {
 	protected ClientImpl(String brokerEndpoint, Options options) {
 		this.brokerEndpoint = brokerEndpoint;
 		this.options = options;
+		HttpOptions httpOptions = options.getHttpOptions();
+		this.client = new OkHttpClient.Builder().connectTimeout(httpOptions.getConnectTimeout(), TimeUnit.SECONDS)
+				.writeTimeout(httpOptions.getWriteTimeout(), TimeUnit.SECONDS)
+				.readTimeout(httpOptions.getReadTimeout(), TimeUnit.SECONDS).build();
 	}
 
 	/*
@@ -59,7 +68,7 @@ public class ClientImpl implements Client {
 	 * 
 	 * @return async write api
 	 * 
-	 * @throws {@link IOException}
+	 * @throws {@link IOException} if create error
 	 *
 	 */
 	@Override
@@ -68,20 +77,36 @@ public class ClientImpl implements Client {
 	}
 
 	/**
-	 * Create async write client by given database name
+	 * Create an async write client by given database name
 	 * 
 	 * @see io.lindb.client.Client#write(java.lang.String)
 	 * 
 	 * @param database database name {@link String}
 	 * @param listener the listener to listen events
 	 * @return write client {@link Write}
-	 * @throws IOException if send data error
+	 * @throws IOException if create error
 	 */
 	@Override
 	public Write write(String database, EventListener listener) throws IOException {
 		String url = String.format("%s%s?db=%s", this.brokerEndpoint, Constants.WRITE_API, database);
-		WriteClient client = new WriteClient(url, this.options.getHttpOptions());
+		WriteClient client = new WriteClient(url, this.client);
 		return WriteFactory.createWrite(this.options.getWriteOptions(), client, listener);
+	}
+
+	/**
+	 * Create a blocking write client by given database name
+	 * 
+	 * @see io.lindb.client.Client#blockingWrite(java.lang.String)
+	 * 
+	 * @param database database name {@link String}
+	 * @return write client {@link Write}
+	 * @throws IOException if create write error
+	 */
+	@Override
+	public BlockingWrite blockingWrite(String database) throws IOException {
+		String url = String.format("%s%s?db=%s", this.brokerEndpoint, Constants.WRITE_API, database);
+		WriteClient client = new WriteClient(url, this.client);
+		return WriteFactory.createBlockingWrite(this.options.getWriteOptions(), client);
 	}
 
 	/**
@@ -94,7 +119,7 @@ public class ClientImpl implements Client {
 	@Override
 	public DataQuery dataQuery() {
 		String url = String.format("%s%s", this.brokerEndpoint, Constants.EXEC_API);
-		HttpClient client = new HttpClient(this.options.getHttpOptions());
+		HttpClient client = new HttpClient(this.client);
 		return new DataQueryImpl(url, client);
 	}
 
@@ -108,7 +133,7 @@ public class ClientImpl implements Client {
 	@Override
 	public StateQuery stateQuery() {
 		String url = String.format("%s%s", this.brokerEndpoint, Constants.EXEC_API);
-		HttpClient client = new HttpClient(this.options.getHttpOptions());
+		HttpClient client = new HttpClient(this.client);
 		return new StateQueryImpl(url, client);
 	}
 
@@ -122,8 +147,14 @@ public class ClientImpl implements Client {
 	@Override
 	public MetadataManager metadataManager() {
 		String url = String.format("%s%s", this.brokerEndpoint, Constants.EXEC_API);
-		HttpClient client = new HttpClient(this.options.getHttpOptions());
+		HttpClient client = new HttpClient(this.client);
 		return new MetadataManagerImpl(url, client);
 	}
 
+	@Override
+	public void close() throws IOException {
+		this.client.dispatcher().cancelAll();
+		this.client.dispatcher().executorService().shutdown();
+		this.client.connectionPool().evictAll();
+	}
 }

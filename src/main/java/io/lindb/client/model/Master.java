@@ -20,6 +20,9 @@ package io.lindb.client.model;
 
 import lombok.Data;
 
+/**
+ * Master information
+ */
 @Data
 public class Master {
 	private long electTime;

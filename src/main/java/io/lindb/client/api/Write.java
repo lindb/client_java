@@ -21,7 +21,7 @@ package io.lindb.client.api;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Write metric api.
+ * Async write metric api.
  */
 public interface Write {
 

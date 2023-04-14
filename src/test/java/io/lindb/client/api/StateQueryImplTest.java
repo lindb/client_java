@@ -26,16 +26,16 @@ import java.util.List;
 
 import org.junit.Test;
 
+import io.lindb.client.internal.BaseClientTest;
 import io.lindb.client.internal.HttpClient;
-import io.lindb.client.internal.HttpOptions;
 import io.lindb.client.model.Master;
 import okhttp3.mockwebserver.MockWebServer;
 
-public class StateQueryImplTest {
+public class StateQueryImplTest extends BaseClientTest {
 	private final HttpClient client;
 
 	public StateQueryImplTest() {
-		this.client = new HttpClient(HttpOptions.builder().build());
+		this.client = new HttpClient(cli);
 	}
 
 	@Test

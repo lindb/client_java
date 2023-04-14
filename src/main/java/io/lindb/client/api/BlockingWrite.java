@@ -18,23 +18,18 @@
  */
 package io.lindb.client.api;
 
-import static org.junit.Assert.assertNotNull;
+import java.io.IOException;
+import java.util.List;
 
-import org.junit.Test;
-
-import io.lindb.client.internal.BaseClientTest;
-import io.lindb.client.internal.HttpClient;
-import io.lindb.client.model.ResultSet;
-import okhttp3.mockwebserver.MockWebServer;
-
-public class DataQueryImplTest extends BaseClientTest {
-	@Test
-	public void metricData() throws Exception {
-		try (MockWebServer server = QueryHelper.mockServer(new ResultSet())) {
-			HttpClient client = new HttpClient(cli);
-			DataQueryImpl query = new DataQueryImpl(server.url("exec").toString(), client);
-			assertNotNull(query.dataQuery("test", "select load from cpu"));
-			assertNotNull(query.metadataQuery("test", "show fields from cpu"));
-		}
-	}
+/**
+ * Blocking write metric api.
+ */
+public interface BlockingWrite {
+	/**
+	 * Write metric points.
+	 * 
+	 * @param points metric data points
+	 * @throws IOException throws {@link IOException} when fail
+	 */
+	void write(List<Point> points) throws IOException;
 }
