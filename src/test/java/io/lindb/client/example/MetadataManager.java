@@ -71,5 +71,6 @@ public class MetadataManager {
 		manager.createDatabase(database);
 		// drop database
 		manager.dropDatabase("java");
+		client.close();
 	}
 }

@@ -19,7 +19,6 @@
 package io.lindb.client.internal;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,20 +37,18 @@ public class WriteClient {
 	private final static Logger LOGGER = LoggerFactory.getLogger(WriteClient.class);
 	private final static MediaType MEDIT_FLAT = MediaType.parse("application/flatbuffer");
 
-	private OkHttpClient client;
+	private final OkHttpClient client;
 	private String url;
 
 	/**
 	 * Create http write clinet instance.
 	 * 
-	 * @param url     write url path
-	 * @param options {@link HttpOptions}
+	 * @param url    write url path
+	 * @param client {@link OkHttpClient} http client
 	 */
-	public WriteClient(String url, HttpOptions options) {
+	public WriteClient(String url, OkHttpClient client) {
 		this.url = url;
-		client = new OkHttpClient.Builder().connectTimeout(options.getConnectTimeout(), TimeUnit.SECONDS)
-				.writeTimeout(options.getWriteTimeout(), TimeUnit.SECONDS)
-				.readTimeout(options.getReadTimeout(), TimeUnit.SECONDS).build();
+		this.client = client;
 	}
 
 	/**
@@ -72,11 +69,42 @@ public class WriteClient {
 		Request request = rb.put(RequestBody.create(data, MEDIT_FLAT)).build();
 		Call call = this.client.newCall(request);
 		try (Response response = call.execute()) {
-			if (response.isSuccessful()) {
-				return true;
+			try {
+				if (response.isSuccessful()) {
+					return true;
+				}
+				LOGGER.warn("write metric failure, error msg: {}", response.body().string());
+			} finally {
+				response.body().close();
 			}
-			LOGGER.warn("write metric failure, error msg: {}", response.body().string());
-			return false;
+		}
+		return false;
+	}
+
+	/**
+	 * Send metric point data.
+	 * 
+	 * @param data     send point data
+	 * @param compress if compress point data
+	 * @throws IOException when send error
+	 */
+	public void sendMetric(byte[] data, boolean compress) throws IOException {
+		Request.Builder rb = new Request.Builder()
+				.header("User-Agent", HttpClient.USER_AGENT)
+				.url(url);
+		if (compress) {
+			rb.header("Content-Encoding", "gzip");
+		}
+		Request request = rb.put(RequestBody.create(data, MEDIT_FLAT)).build();
+		Call call = this.client.newCall(request);
+		try (Response response = call.execute()) {
+			try {
+				if (!response.isSuccessful()) {
+					throw new IOException(response.body().string());
+				}
+			} finally {
+				response.body().close();
+			}
 		}
 	}
 }

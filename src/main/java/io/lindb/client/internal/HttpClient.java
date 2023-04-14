@@ -19,7 +19,6 @@
 package io.lindb.client.internal;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import io.lindb.client.util.JsonUtil;
 import okhttp3.Call;
@@ -33,22 +32,25 @@ import okhttp3.Response;
  * Http write client.
  */
 public class HttpClient {
-	protected final static String USER_AGENT = String.format("lindb-client-java/%s (%s; %s) Java/%s", "0.0.3",
+	/**
+	 * http user agent information
+	 */
+	protected final static String USER_AGENT = String.format("lindb-client-java/%s (%s; %s) Java/%s", "0.1.0",
 			System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("java.version"));
-
+	/**
+	 * Json media type
+	 */
 	public final static MediaType MEDIT_JSON = MediaType.parse("application/json");
 
-	private OkHttpClient client;
+	private final OkHttpClient client;
 
 	/**
 	 * Create http clinet instance.
 	 * 
-	 * @param options {@link HttpOptions}
+	 * @param client {@link OkHttpClient} http client
 	 */
-	public HttpClient(HttpOptions options) {
-		client = new OkHttpClient.Builder().connectTimeout(options.getConnectTimeout(), TimeUnit.SECONDS)
-				.writeTimeout(options.getWriteTimeout(), TimeUnit.SECONDS)
-				.readTimeout(options.getReadTimeout(), TimeUnit.SECONDS).build();
+	public HttpClient(OkHttpClient client) {
+		this.client = client;
 	}
 
 	/**
@@ -68,11 +70,15 @@ public class HttpClient {
 		Request request = rb.put(RequestBody.create(JsonUtil.toString(params), MEDIT_JSON)).build();
 		Call call = this.client.newCall(request);
 		try (Response response = call.execute()) {
-			String respBody = response.body().string();
-			if (response.code() < 400) {
-				return JsonUtil.toObject(respBody, clazz);
+			try {
+				String respBody = response.body().string();
+				if (response.code() < 400) {
+					return JsonUtil.toObject(respBody, clazz);
+				}
+				throw new IOException(respBody);
+			} finally {
+				response.body().close();
 			}
-			throw new IOException(respBody);
 		}
 	}
 }

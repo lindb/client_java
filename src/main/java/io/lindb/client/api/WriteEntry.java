@@ -18,23 +18,28 @@
  */
 package io.lindb.client.api;
 
+import java.util.List;
+
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
- * Data retry entry include data and retry count.
+ * Data write entry include data and retry count.
  */
 @NotThreadSafe
-public class RetryEntry {
+public class WriteEntry {
 	private final byte[] data;
+	private final List<Point> points;
 	private int retry;
 
 	/**
-	 * Create retryn entry instance with data.
+	 * Create write entry instance with data.
 	 * 
-	 * @param data data of point
+	 * @param data   data of points
+	 * @param points batched points
 	 */
-	protected RetryEntry(byte[] data) {
+	protected WriteEntry(byte[] data, List<Point> points) {
 		this.data = data;
+		this.points = points;
 	}
 
 	/**
@@ -47,10 +52,19 @@ public class RetryEntry {
 	/**
 	 * Return the retry data.
 	 * 
-	 * @return data of point
+	 * @return data of points
 	 */
 	public byte[] getData() {
 		return data;
+	}
+
+	/**
+	 * Return write points
+	 * 
+	 * @return write points
+	 */
+	public List<Point> getPoints() {
+		return points;
 	}
 
 	/**

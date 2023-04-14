@@ -20,6 +20,7 @@ package io.lindb.client;
 
 import java.io.IOException;
 
+import io.lindb.client.api.BlockingWrite;
 import io.lindb.client.api.DataQuery;
 import io.lindb.client.api.EventListener;
 import io.lindb.client.api.MetadataManager;
@@ -29,25 +30,34 @@ import io.lindb.client.api.Write;
 /**
  * LinDB client interface.
  */
-public interface Client {
+public interface Client extends AutoCloseable {
 	/**
-	 * Create write client.
+	 * Create an async write client.
 	 * 
 	 * @param database database name {@link String}
-	 * @return write client {@link Write}
+	 * @return an aysnc write client {@link Write}
 	 * @throws IOException if send data error
 	 */
 	Write write(String database) throws IOException;
 
 	/**
-	 * Create write client.
+	 * Create an async write client.
 	 * 
 	 * @param database database name {@link String}
 	 * @param listener the listener to listen events
-	 * @return write client {@link Write}
+	 * @return async write client {@link Write}
 	 * @throws IOException if send data error
 	 */
 	Write write(String database, EventListener listener) throws IOException;
+
+	/**
+	 * Create a blocking write client.
+	 * 
+	 * @param database database name {@link String}
+	 * @return a blocking write client {@link Write}
+	 * @throws IOException if send data error
+	 */
+	BlockingWrite blockingWrite(String database) throws IOException;
 
 	/**
 	 * Create metric data query client.

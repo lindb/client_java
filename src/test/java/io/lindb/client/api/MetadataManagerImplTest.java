@@ -23,8 +23,8 @@ import java.util.List;
 
 import org.junit.Test;
 
+import io.lindb.client.internal.BaseClientTest;
 import io.lindb.client.internal.HttpClient;
-import io.lindb.client.internal.HttpOptions;
 import io.lindb.client.model.ClusterConfig;
 import io.lindb.client.model.Database;
 import io.lindb.client.model.DatabaseOption;
@@ -32,11 +32,11 @@ import io.lindb.client.model.Interval;
 import io.lindb.client.model.RepoState;
 import okhttp3.mockwebserver.MockWebServer;
 
-public class MetadataManagerImplTest {
+public class MetadataManagerImplTest extends BaseClientTest {
 	private final HttpClient client;
 
 	public MetadataManagerImplTest() {
-		this.client = new HttpClient(HttpOptions.builder().build());
+		this.client = new HttpClient(cli);
 	}
 
 	@Test

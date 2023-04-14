@@ -18,23 +18,21 @@
  */
 package io.lindb.client.api;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
 
 import org.junit.Test;
 
-import io.lindb.client.internal.BaseClientTest;
-import io.lindb.client.internal.HttpClient;
-import io.lindb.client.model.ResultSet;
-import okhttp3.mockwebserver.MockWebServer;
-
-public class DataQueryImplTest extends BaseClientTest {
+public class WriteEntryTest {
 	@Test
-	public void metricData() throws Exception {
-		try (MockWebServer server = QueryHelper.mockServer(new ResultSet())) {
-			HttpClient client = new HttpClient(cli);
-			DataQueryImpl query = new DataQueryImpl(server.url("exec").toString(), client);
-			assertNotNull(query.dataQuery("test", "select load from cpu"));
-			assertNotNull(query.metadataQuery("test", "show fields from cpu"));
-		}
+	public void retryEntry() {
+		WriteEntry entry = new WriteEntry("test".getBytes(), new ArrayList<>());
+		assertEquals(0, entry.getRetry());
+		entry.increaseRetry();
+		assertEquals(1, entry.getRetry());
+		assertTrue(entry.getPoints().isEmpty());
+		assertEquals("test", new String(entry.getData()));
 	}
 }

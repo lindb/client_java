@@ -18,6 +18,8 @@
  */
 package io.lindb.client.api;
 
+import java.util.List;
+
 /**
  * Error event listener when write data failure.
  */
@@ -26,8 +28,9 @@ public interface EventListener {
 	/**
 	 * onEvent will be called when write data failure.
 	 *
-	 * @param event event type
-	 * @param e     exception
+	 * @param event  event type
+	 * @param points points of failed
+	 * @param e      exception
 	 */
-	void onError(EventType event, final Throwable e);
+	void onError(EventType event, List<Point> points, final Throwable e);
 }

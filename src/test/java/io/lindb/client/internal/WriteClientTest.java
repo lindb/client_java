@@ -19,6 +19,7 @@
 package io.lindb.client.internal;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-public class WriteClientTest {
+public class WriteClientTest extends BaseClientTest {
 
 	@Test
 	public void writeMetric() throws IOException {
@@ -43,11 +44,34 @@ public class WriteClientTest {
 			server.start();
 
 			HttpUrl baseUrl = server.url(Constants.WRITE_API);
-			WriteClient client = new WriteClient(baseUrl.toString(), HttpOptions.builder().build());
+			WriteClient client = new WriteClient(baseUrl.toString(), cli);
 			// write success
 			assertTrue(client.writeMetric("data".getBytes(), true));
 			// write failure
 			assertFalse(client.writeMetric("data".getBytes(), false));
+		} finally {
+			server.close();
+		}
+	}
+
+	@Test
+	public void sendMetric() throws IOException {
+		// Create a MockWebServer.
+		MockWebServer server = new MockWebServer();
+		try {
+			server.enqueue(new MockResponse().setResponseCode(204));
+			server.enqueue(new MockResponse().setBody("write failure").setResponseCode(500));
+			// Start the server.
+			server.start();
+
+			HttpUrl baseUrl = server.url(Constants.WRITE_API);
+			WriteClient client = new WriteClient(baseUrl.toString(), cli);
+			// write success
+			client.sendMetric("data".getBytes(), true);
+			// write failure
+			assertThrows(IOException.class, () -> {
+				client.sendMetric("data".getBytes(), false);
+			});
 		} finally {
 			server.close();
 		}

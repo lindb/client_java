@@ -16,19 +16,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package io.lindb.client.api;
+package io.lindb.client.internal;
 
-import static org.junit.Assert.assertEquals;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
-public class RetryEntryTest {
-	@Test
-	public void retryEntry() {
-		RetryEntry entry = new RetryEntry("test".getBytes());
-		assertEquals(0, entry.getRetry());
-		entry.increaseRetry();
-		assertEquals(1, entry.getRetry());
-		assertEquals("test", new String(entry.getData()));
+import okhttp3.OkHttpClient;
+
+public class BaseClientTest {
+	public static OkHttpClient cli;
+
+	@BeforeClass
+	public static void setUp() throws Exception {
+		HttpOptions httpOptions = HttpOptions.builder().build();
+
+		cli = new OkHttpClient.Builder().connectTimeout(httpOptions.getConnectTimeout(), TimeUnit.SECONDS)
+				.writeTimeout(httpOptions.getWriteTimeout(), TimeUnit.SECONDS)
+				.readTimeout(httpOptions.getReadTimeout(), TimeUnit.SECONDS).build();
+	}
+
+	@AfterClass
+	public static void tearDown() throws Exception {
+		cli.dispatcher().executorService().shutdown();
+		cli.connectionPool().evictAll();
 	}
 }

@@ -47,5 +47,6 @@ public class StateQuery {
 		System.out.println("replication state: =>" + query.dataFamilyState("/lindb-cluster", "_internal"));
 		System.out.println("data family state: =>" + query.replicationState("/lindb-cluster", "_internal"));
 		System.out.println("common ql: =>" + query.query("show master", Master.class));
+		client.close();
 	}
 }

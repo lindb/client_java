@@ -19,8 +19,9 @@
 package io.lindb.client.internal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertThrows;
+
+import java.io.IOException;
 
 import org.junit.Test;
 
@@ -30,7 +31,7 @@ import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-public class HttpClientTest {
+public class HttpClientTest extends BaseClientTest {
 
 	@Test
 	public void put() throws Exception {
@@ -43,19 +44,14 @@ public class HttpClientTest {
 			server.start();
 
 			HttpUrl baseUrl = server.url(Constants.EXEC_API);
-			HttpClient client = new HttpClient(HttpOptions.builder().build());
+			HttpClient client = new HttpClient(cli);
 			// put success
 			String result = client.put(baseUrl.toString(), "data", String.class);
 			assertEquals("ok", result);
-			boolean throwEx = false;
-			try {
+			assertThrows(IOException.class, () -> {
 				// put failure
 				client.put(baseUrl.toString(), "data", String.class);
-				fail();
-			} catch (Exception e) {
-				throwEx = true;
-			}
-			assertTrue(throwEx);
+			});
 		} finally {
 			server.close();
 		}

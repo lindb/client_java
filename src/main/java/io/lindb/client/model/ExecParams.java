@@ -22,6 +22,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 
+/**
+ * Lin query language execute params.
+ */
 @Data
 public class ExecParams {
 	@JsonProperty("db")
