@@ -38,8 +38,6 @@ public interface DataQuery {
 	 * @return result set
 	 * @throws Exception throws exception when query failure
 	 */
-	/**
-	 */
 	ResultSet dataQuery(String database, String ql) throws Exception;
 
 	/**
