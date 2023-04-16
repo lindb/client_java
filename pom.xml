@@ -287,6 +287,14 @@
             </configuration>
          </plugin>
          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-deploy-plugin</artifactId>
+            <configuration>
+               <!-- disable maven deploy plugin, using nexus-staging-maven-plugin-->
+               <skip>true</skip>
+            </configuration>
+         </plugin>
+         <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
             <version>1.6.13</version>
@@ -303,7 +311,6 @@
                   <phase>deploy</phase>
                   <goals>
                      <goal>deploy</goal>
-                     <goal>release</goal>
                   </goals>
                </execution>
             </executions>
