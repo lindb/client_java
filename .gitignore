@@ -8,6 +8,7 @@ target/*
 *.iml
 .DS_Store
 .factorypath
+pom.xml.versionsBackup
 
 # Log file
 *.log

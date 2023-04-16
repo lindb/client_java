@@ -35,7 +35,7 @@ public class HttpClient {
 	/**
 	 * http user agent information
 	 */
-	protected final static String USER_AGENT = String.format("lindb-client-java/%s (%s; %s) Java/%s", "0.1.0",
+	protected final static String USER_AGENT = String.format("lindb-client-java/%s (%s; %s) Java/%s", "0.0.4",
 			System.getProperty("os.name"), System.getProperty("os.arch"), System.getProperty("java.version"));
 	/**
 	 * Json media type

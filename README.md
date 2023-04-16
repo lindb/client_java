@@ -45,7 +45,7 @@ Download the latest version:
 <dependency>
     <groupId>io.lindb</groupId>
     <artifactId>lindb-client</artifactId>
-    <version>0.1.0</version>
+    <version>0.0.4</version>
 </dependency>
 ```
        
@@ -53,7 +53,7 @@ Download the latest version:
 
 ```groovy
 dependencies {
-    implementation "io.lindb:lindb-client:0.1.0"
+    implementation "io.lindb:lindb-client:0.0.4"
 }
 ```
 
